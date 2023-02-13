@@ -5,14 +5,21 @@ at its disposal. It was designed to be highly configurable and easy to use.
 
 ## Setup
 
-This tool makes use of several python packages which must be installed with pip before attempting to use it.
+Install poetry:
 
-- z3-solver
-- docplex
-- docloud
-- ortools
-- networkx
-- minizinc
+```shell
+pip3 install poetry
+```
+
+Install needed libraries:
+```shell
+poetry install
+```
+on Windows, you mya need to run this due to alias problem:
+```shell
+python3 -m poetry install
+```
+
 
 Furthermore, you need the Minzinc and CPLEX applications installed as their binaries are required to use the following solvers:
 
@@ -26,6 +33,12 @@ To install them, please use the following links:
 - Minizinc [https://www.minizinc.org/]
 - CPLEX [https://www.ibm.com/support/pages/downloading-ibm-ilog-cplex-optimization-studio-v1290]
 - Google OR-Tools [https://developers.google.com/optimization/install/download]
+
+Enter the shell:
+
+```shell
+poetry shell
+```
 
 ## Creating your own use-case
 

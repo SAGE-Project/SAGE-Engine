@@ -1,14 +1,20 @@
 from Solvers.Core.Restrictions.RestrictionHardware import RestrictionHardware
 from datetime import datetime
 
+
 class ManuverSolver(object):
-
-    def init_problem(self, problem, solver_type,
-                     default_offers_encoding=True,
-                     sb_option=None,
-                     smt2lib=None, smt2libsol=None, cplexLPPath=None,
-                     use_vm_vector_in_encoding=False, offers_list_filtered=False):
-
+    def init_problem(
+        self,
+        problem,
+        solver_type,
+        default_offers_encoding=True,
+        sb_option=None,
+        smt2lib=None,
+        smt2libsol=None,
+        cplexLPPath=None,
+        use_vm_vector_in_encoding=False,
+        offers_list_filtered=False,
+    ):
         self.__constMap = {}
         self.problem = problem
         self.nrVM = self.problem.nrVM
@@ -99,7 +105,8 @@ class ManuverSolver(object):
         :param upperBound: a positive number
         :return:
         """
-        for i in range(len(compsIdList)): compsIdList[i] -= 1
+        for i in range(len(compsIdList)):
+            compsIdList[i] -= 1
         print("Parent class RestrictionRangeBound")
 
     def RestrictionFullDeployment(self, alphaCompId, notInConflictCompsIdList):
@@ -112,8 +119,9 @@ class ManuverSolver(object):
         """
         print("Parent class RestrictionFullDeployment")
 
-    def RestrictionRequireProvideDependency(self, alphaCompId, betaCompId, alphaCompIdInstances,
-                                            betaCompIdInstances):
+    def RestrictionRequireProvideDependency(
+        self, alphaCompId, betaCompId, alphaCompIdInstances, betaCompIdInstances
+    ):
         """
         The number of instances of component alpha depends on the number of instances of component beta
         :param alphaCompId: id of the first component
@@ -136,7 +144,6 @@ class ManuverSolver(object):
         """
         print("Parent class RestrictionAlphaOrBeta")
 
-
     def run(self):
         """
         Invokes the solving of the problem (solution and additional effect like creation of special files)
@@ -148,11 +155,11 @@ class ManuverSolver(object):
 
     def RestrictionFixComponentOnVM(self, comp_id, vm_id, value):
         """
-          Force placing component on a specific VM
-          :param comp_id: the ID of the component
-          :param vm_id: the ID of the VM
-          :return: None
-          """
+        Force placing component on a specific VM
+        :param comp_id: the ID of the component
+        :param vm_id: the ID of the VM
+        :return: None
+        """
         print("Parent RestrictionFixComponentOnVM")
 
     def RestrictionPriceOrder(self, start_vm_id, end_vm_id):

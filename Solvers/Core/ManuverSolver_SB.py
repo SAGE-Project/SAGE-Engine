@@ -1,28 +1,29 @@
 from z3 import *
 
 from Solvers.Core.ManuverSolver import ManuverSolver
+
+
 class ManuverSolver_SB(ManuverSolver):
     def _symmetry_breaking(self):
-
         # one criteria
         if "PR" == self.sb_option:  # PR
             self.sbPrice()
         elif "L" == self.sb_option:  # L
             self.sbVMLoad()
         elif "LX" == self.sb_option:  # LX
-            self.sbLex();
+            self.sbLex()
         elif "FV" == self.sb_option:  # FV
             self.sbFixVariables()
 
-        #two criteria
+        # two criteria
         elif "PRLX" == self.sb_option:  # PRLX
             self.sbPrice(criteria1="RestrictionLex")
-        elif "PRL" == self.sb_option: # PRL
+        elif "PRL" == self.sb_option:  # PRL
             self.sbPrice(criteria1="RestrictionLoad")
 
         elif "LLX" == self.sb_option:  # LLX
             self.sbVMLoad(criteria1="RestrictionLex")
-        elif "LPR" == self.sb_option: # LPR
+        elif "LPR" == self.sb_option:  # LPR
             self.sbVMLoad(criteria1="RestrictionPrice")
         elif "FVPR" == self.sb_option:  # FVPR
             self.sbFixVariables(criteriaList=["RestrictionPrice"])
@@ -31,7 +32,7 @@ class ManuverSolver_SB(ManuverSolver):
         elif "FVLX" == self.sb_option:  # FVLX
             self.sbFixVariables(criteriaList=["RestrictionLex"])
 
-        #three criterias
+        # three criterias
         elif "FVPRL" == self.sb_option:  # FVPRL
             self.sbFixVariables(criteriaList=["RestrictionPrice", "RestrictionLoad"])
         elif "FVPRLX" == self.sb_option:  # FVPRLX
@@ -45,15 +46,18 @@ class ManuverSolver_SB(ManuverSolver):
         elif "LPRLX" == self.sb_option:  # LPRLX
             self.sbVMLoad(criteria1="RestrictionPrice", criteria2="RestrictionLex")
 
-        #four criterias
+        # four criterias
         elif "FVPRLLX" == self.sb_option:  # FVPRLLEX
-            self.sbFixVariables(criteriaList=["RestrictionPrice", "RestrictionLoad", "RestrictionLex"])
+            self.sbFixVariables(
+                criteriaList=["RestrictionPrice", "RestrictionLoad", "RestrictionLex"]
+            )
         elif "FVLPRLX" == self.sb_option:  # FVLPRLX
-            self.sbFixVariables(criteriaList=["RestrictionLoad", "RestrictionPrice", "RestrictionLex"])
+            self.sbFixVariables(
+                criteriaList=["RestrictionLoad", "RestrictionPrice", "RestrictionLex"]
+            )
 
         elif "sb_lex_col_binary" == self.sb_option:  # do tests for curiosity
             self.sbBinary()
-
 
     def sbBinary(self):
         self.RestrictionLexBinaryNumber()
@@ -64,13 +68,14 @@ class ManuverSolver_SB(ManuverSolver):
         """
         vm_id = 0
         # print("Max cliques=", self.problem.max_clique)
-        
-        for inst in self.problem.max_clique[1]:
 
+        for inst in self.problem.max_clique[1]:
             for comp_id in self.problem.max_clique[0].keys():
                 if inst in self.problem.max_clique[0][comp_id]:
                     self.RestrictionFixComponentOnVM(comp_id, vm_id, 1)
-                elif self.problem.max_clique[0][comp_id][0] in self.problem.max_clique[1]:
+                elif (
+                    self.problem.max_clique[0][comp_id][0] in self.problem.max_clique[1]
+                ):
                     self.RestrictionFixComponentOnVM(comp_id, vm_id, 0)
             vm_id += 1
 
@@ -90,23 +95,28 @@ class ManuverSolver_SB(ManuverSolver):
         #         self.vmIds_for_fixedComponents.add(vm_id)
         #     stop_id = vm_id
 
-            # if criteriaList is not None:    # FVLX -> Se aplica LX pe masini
-            #     # print("comp=", comp_id, " interval[", start_id, ", ", stop_id, "]")
-            #     self.sb(start_id, stop_id, criteriaList)
+        # if criteriaList is not None:    # FVLX -> Se aplica LX pe masini
+        #     # print("comp=", comp_id, " interval[", start_id, ", ", stop_id, "]")
+        #     self.sb(start_id, stop_id, criteriaList)
         if criteriaList is not None:
-            #print("rest_of interval", " interval[", stop_id, ", ", self.nrVM, "]")
+            # print("rest_of interval", " interval[", stop_id, ", ", self.nrVM, "]")
             self.sb(vm_id, self.nrVM, criteriaList)
-
 
     def sb(self, start_vm_index, end_vm_index, criteriaList=[]):
         criteriaList_size = len(criteriaList)
         for vm_id in range(start_vm_index, end_vm_index - 1):
             cr1_precondition = getattr(self, criteriaList[0])(vm_id)
             if criteriaList_size == 2:
-                getattr(self, criteriaList[1])(vm_id, additional_constraints=[cr1_precondition])
+                getattr(self, criteriaList[1])(
+                    vm_id, additional_constraints=[cr1_precondition]
+                )
             elif criteriaList_size == 3:
-                cr2_precondition = getattr(self, criteriaList[1])(vm_id, additional_constraints=[cr1_precondition])
-                getattr(self, criteriaList[2])(vm_id, additional_constraints=[cr1_precondition, cr2_precondition])
+                cr2_precondition = getattr(self, criteriaList[1])(
+                    vm_id, additional_constraints=[cr1_precondition]
+                )
+                getattr(self, criteriaList[2])(
+                    vm_id, additional_constraints=[cr1_precondition, cr2_precondition]
+                )
 
     def sbLex(self):
         self.sb(0, self.nrVM, criteriaList=["RestrictionLex"])

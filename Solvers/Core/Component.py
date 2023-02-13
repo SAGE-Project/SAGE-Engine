@@ -1,6 +1,20 @@
 class Component:
-    def __init__(self, id, name, cpus, gpu,  memory,  storageSize, storageType, storageValue, netIn, netOut, netConnections,
-                 keywords, operatingSystem):
+    def __init__(
+        self,
+        id,
+        name,
+        cpus,
+        gpu,
+        memory,
+        storageSize,
+        storageType,
+        storageValue,
+        netIn,
+        netOut,
+        netConnections,
+        keywords,
+        operatingSystem,
+    ):
         self.id = id
         self.name = name
         # hardware description
@@ -9,7 +23,7 @@ class Component:
         self.HM = memory
         self.HS = storageSize
         self.HSType = storageType
-        self.HSValue =storageValue
+        self.HSValue = storageValue
         # network description
         self.NIn = netIn
         self.NOut = netOut
@@ -27,10 +41,8 @@ class Component:
         self.fullDeployedComponent = False
         self.numberOfInstancesDependences = set()
 
-
     def getInstances(self):
         return self.minimumNumberOfInstances
-
 
     def getMinimumPossibleNumberOfInstances(self, comps_set):
         """
@@ -49,10 +61,24 @@ class Component:
         return minimum
 
     def __repr__(self):
-        return "ID: {} Name: {} Hardware [CPUs: {} GPU: {} Memory: {} StorageSize: {} StorageType: {} StorageValue: {}]"\
-                " Network[ In: {} Out: {} Connections: {} ] Keywords: {} OperatingSystem: {}"\
-            .format(self.id, self.name, self.HC, self.HCType, self.HM, self.HS, self.HSType, self.HSValue, self.NIn,
-                    self.NOut, self.NConnections, self.keywords, self.operatingSystem)
+        return (
+            "ID: {} Name: {} Hardware [CPUs: {} GPU: {} Memory: {} StorageSize: {} StorageType: {} StorageValue: {}]"
+            " Network[ In: {} Out: {} Connections: {} ] Keywords: {} OperatingSystem: {}".format(
+                self.id,
+                self.name,
+                self.HC,
+                self.HCType,
+                self.HM,
+                self.HS,
+                self.HSType,
+                self.HSValue,
+                self.NIn,
+                self.NOut,
+                self.NConnections,
+                self.keywords,
+                self.operatingSystem,
+            )
+        )
 
     def getComponentHardWareResources(self):
         """

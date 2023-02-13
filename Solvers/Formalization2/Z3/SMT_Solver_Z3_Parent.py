@@ -2,8 +2,8 @@ from z3 import *
 from Solvers.Core.ManuverSolver import ManuverSolver
 import time
 
-class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
 
+class Z3_Solver_Int_Parent_Form2(ManuverSolver):  # ManeuverProblem):
     def _initSolver(self):
         """
         Initializes the solver
@@ -11,7 +11,7 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         """
         if self.solverTypeOptimize:
             self.solver = Optimize()
-            self.solver.set('timeout', 2400000)
+            self.solver.set("timeout", 2400000)
         else:
             self.solver = Solver()
             self.solver.set(unsat_core=True)
@@ -25,7 +25,7 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
 
     def _defineVariablesAndConstraints(self):
         # VM usage vector vm in {0, 1}, k = 1..M; vm_k = 1 if at least one component is assigned to vm_k.
-        #self.vm = {}
+        # self.vm = {}
         # Assignment matrix a_{alpha,k}: 1 if component alpha is on machine k, 0 otherwise
         self.a = {}
         # VMType  - type of a leased VM
@@ -46,9 +46,19 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         n = n - 1
         for vm_id in range(self.nrVM - 1):
             self.solver.add(
-                sum([self.a[list_comps[i] * self.nrVM + vm_id] * (2 ** (n - i)) for i in range(len(list_comps))]) >=
-                sum([self.a[list_comps[i] * self.nrVM + vm_id + 1] * (2 ** (n - i)) for i in range(len(list_comps))]))
-
+                sum(
+                    [
+                        self.a[list_comps[i] * self.nrVM + vm_id] * (2 ** (n - i))
+                        for i in range(len(list_comps))
+                    ]
+                )
+                >= sum(
+                    [
+                        self.a[list_comps[i] * self.nrVM + vm_id + 1] * (2 ** (n - i))
+                        for i in range(len(list_comps))
+                    ]
+                )
+            )
 
     def RestrictionLex(self, vm_id, additional_constraints=[]):
         """
@@ -58,14 +68,20 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :return:
         """
         l = additional_constraints.copy()
-        #print("self.nrComp ", self.nrComp)
+        # print("self.nrComp ", self.nrComp)
         for i in range(0, self.nrComp):
             if i > 0:
-                u = i-1
-                l.append(self.a[u * self.nrVM + vm_id] == self.a[u * self.nrVM + vm_id + 1])
-            #print(l)
-            self.solver.add(Implies(And(l), self.a[i * self.nrVM + vm_id] >= self.a[i * self.nrVM + vm_id + 1]))
-
+                u = i - 1
+                l.append(
+                    self.a[u * self.nrVM + vm_id] == self.a[u * self.nrVM + vm_id + 1]
+                )
+            # print(l)
+            self.solver.add(
+                Implies(
+                    And(l),
+                    self.a[i * self.nrVM + vm_id] >= self.a[i * self.nrVM + vm_id + 1],
+                )
+            )
 
     def RestrictionPrice(self, vm_id, additional_constraints=[]):
         """
@@ -74,16 +90,24 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :param additonal_constraints: other constraints
         :return:
         """
-        #print("Price vm ", vm_id, "combined=", additional_constraints)
+        # print("Price vm ", vm_id, "combined=", additional_constraints)
         if len(additional_constraints) == 0:
             self.solver.add(self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1])
         else:
             if len(additional_constraints) == 1:
                 self.solver.add(
-                    Implies(additional_constraints[0], self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1]))
+                    Implies(
+                        additional_constraints[0],
+                        self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1],
+                    )
+                )
             else:
-                self.solver.add\
-                    (Implies(And(additional_constraints), self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1]))
+                self.solver.add(
+                    Implies(
+                        And(additional_constraints),
+                        self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1],
+                    )
+                )
 
         return self.PriceProv[vm_id] == self.PriceProv[vm_id + 1]
 
@@ -105,21 +129,53 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :return:
         """
         if len(additional_constraints) == 0:
-           self.solver.add(sum([self.a[i + vm_id] for i in range(0, len(self.a), self.nrVM)])
-                                 >= sum([self.a[i + vm_id + 1] for i in range(0, len(self.a), self.nrVM)]))
+            self.solver.add(
+                sum([self.a[i + vm_id] for i in range(0, len(self.a), self.nrVM)])
+                >= sum(
+                    [self.a[i + vm_id + 1] for i in range(0, len(self.a), self.nrVM)]
+                )
+            )
         else:
             if len(additional_constraints) == 1:
-                self.solver.add(Implies(additional_constraints[0],
-                                        sum([self.a[i + vm_id] for i in range(0, len(self.a), self.nrVM)])
-                                        >= sum([self.a[i + vm_id + 1] for i in range(0, len(self.a), self.nrVM)])))
+                self.solver.add(
+                    Implies(
+                        additional_constraints[0],
+                        sum(
+                            [
+                                self.a[i + vm_id]
+                                for i in range(0, len(self.a), self.nrVM)
+                            ]
+                        )
+                        >= sum(
+                            [
+                                self.a[i + vm_id + 1]
+                                for i in range(0, len(self.a), self.nrVM)
+                            ]
+                        ),
+                    )
+                )
             else:
-                self.solver.add(Implies(And(additional_constraints),
-                                        sum([self.a[i + vm_id] for i in range(0, len(self.a), self.nrVM)])
-                                        >= sum([self.a[i + vm_id + 1] for i in range(0, len(self.a), self.nrVM)])))
+                self.solver.add(
+                    Implies(
+                        And(additional_constraints),
+                        sum(
+                            [
+                                self.a[i + vm_id]
+                                for i in range(0, len(self.a), self.nrVM)
+                            ]
+                        )
+                        >= sum(
+                            [
+                                self.a[i + vm_id + 1]
+                                for i in range(0, len(self.a), self.nrVM)
+                            ]
+                        ),
+                    )
+                )
 
-
-        return sum([self.a[i + vm_id] for i in range(0, len(self.a), self.nrVM)]) == \
-               sum([self.a[i + vm_id + 1] for i in range(0, len(self.a), self.nrVM)])
+        return sum(
+            [self.a[i + vm_id] for i in range(0, len(self.a), self.nrVM)]
+        ) == sum([self.a[i + vm_id + 1] for i in range(0, len(self.a), self.nrVM)])
 
     def RestrictionConflict(self, alphaCompId, conflictCompsIdList):
         """
@@ -129,19 +185,39 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :return: None
         """
         self.problem.logger.debug(
-            "RestrictionConflict: alphaCompId = {} conflictComponentsList = {}".format(alphaCompId,
-                                                                                       conflictCompsIdList))
+            "RestrictionConflict: alphaCompId = {} conflictComponentsList = {}".format(
+                alphaCompId, conflictCompsIdList
+            )
+        )
         for j in range(self.nrVM):
             for k in range(self.nrOffers):
                 for conflictCompId in conflictCompsIdList:
                     # self.problem.logger.debug("...{} <= 1".format([self.a[alphaCompId * self.nrVM + j], self.a[conflictCompId * self.nrVM + j]]))
                     if self.solverTypeOptimize:
-                        self.solver.add(self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] +
-                                            self.a[conflictCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] <= 1)
+                        self.solver.add(
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            + self.a[
+                                conflictCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            <= 1
+                        )
                     else:
                         self.solver.assert_and_track(
-                            sum([self.a[alphaCompId * self.nrVM + j], self.a[conflictCompId * self.nrVM + j]]) <= 1,
-                            "LabelConflict: " + str(self.labelIdx_conflict))
+                            sum(
+                                [
+                                    self.a[alphaCompId * self.nrVM + j],
+                                    self.a[conflictCompId * self.nrVM + j],
+                                ]
+                            )
+                            <= 1,
+                            "LabelConflict: " + str(self.labelIdx_conflict),
+                        )
                         self.labelIdx_conflict += 1
 
     def RestrictionOneToOneDependency(self, alphaCompId, betaCompId):
@@ -154,7 +230,23 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         for j in range(self.nrVM):
             if self.solverTypeOptimize:
                 self.solver.add(
-                    sum(self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for k in range(self.nrOffers)) == sum(self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for k in range(self.nrOffers)))
+                    sum(
+                        self.a[
+                            alphaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for k in range(self.nrOffers)
+                    )
+                    == sum(
+                        self.a[
+                            betaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for k in range(self.nrOffers)
+                    )
+                )
 
     def RestrictionManyToManyDependency(self, alphaCompId, betaCompId, relation):
         """
@@ -170,32 +262,161 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         if relation == "<=":
             if self.solverTypeOptimize:
                 self.solver.add(
-                    sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) <=
-                    sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]))
+                    sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    <= sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                )
             else:
                 self.solver.assert_and_track(
-                    sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) <=
-                    sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]), "LabelManyToMany1: " + str(self.labelIdx))
+                    sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    <= sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    ),
+                    "LabelManyToMany1: " + str(self.labelIdx),
+                )
                 self.labelIdx += 1
         elif relation == ">=":
             if self.solverTypeOptimize:
                 self.solver.add(
-                    sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) >=
-                    sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]))
+                    sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    >= sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                )
             else:
                 self.solver.assert_and_track(
-                    sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) >=
-                    sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]), "LabelManyToMany1: " + str(self.labelIdx))
+                    sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    >= sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    ),
+                    "LabelManyToMany1: " + str(self.labelIdx),
+                )
                 self.labelIdx += 1
         elif relation == "=":
             if self.solverTypeOptimize:
                 self.solver.add(
-                    sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) ==
-                    sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]))
+                    sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    == sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                )
             else:
                 self.solver.assert_and_track(
-                    sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) ==
-                    sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]), "LabelManyToMany1: " + str(self.labelIdx))
+                    sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    == sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    ),
+                    "LabelManyToMany1: " + str(self.labelIdx),
+                )
                 self.labelIdx += 1
 
     def RestrictionOneToManyDependency(self, alphaCompId, betaCompId, noInstances):
@@ -208,22 +429,116 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         """
         if self.solverTypeOptimize:
             self.solver.add(
-                noInstances * sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) -
-                              sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) > 0)
+                noInstances
+                * sum(
+                    [
+                        self.a[
+                            alphaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                - sum(
+                    [
+                        self.a[
+                            betaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                > 0
+            )
         else:
             self.solver.assert_and_track(
-                noInstances * sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) -
-                              sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) > 0, "LabelOneToMany: " + str(self.labelIdx))
+                noInstances
+                * sum(
+                    [
+                        self.a[
+                            alphaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                - sum(
+                    [
+                        self.a[
+                            betaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                > 0,
+                "LabelOneToMany: " + str(self.labelIdx),
+            )
             self.labelIdx += 1
 
         if self.solverTypeOptimize:
             self.solver.add(
-               noInstances * sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) -
-                              sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) <= noInstances)
+                noInstances
+                * sum(
+                    [
+                        self.a[
+                            alphaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                - sum(
+                    [
+                        self.a[
+                            betaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                <= noInstances
+            )
         else:
             self.solver.assert_and_track(
-                noInstances * sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) -
-                              sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) <= noInstances, "LabelOneToMany: " + str(self.labelIdx))
+                noInstances
+                * sum(
+                    [
+                        self.a[
+                            alphaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                - sum(
+                    [
+                        self.a[
+                            betaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                <= noInstances,
+                "LabelOneToMany: " + str(self.labelIdx),
+            )
             self.labelIdx += 1
 
     def RestrictionUpperLowerEqualBound(self, compsIdList, bound, operator):
@@ -238,41 +553,120 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :return: None
         """
 
-        self.problem.logger.debug("RestrictionUpperLowerEqualBound: {} {} {} ".format(compsIdList, operator, bound))
+        self.problem.logger.debug(
+            "RestrictionUpperLowerEqualBound: {} {} {} ".format(
+                compsIdList, operator, bound
+            )
+        )
 
         if operator == "<=":
             if self.solverTypeOptimize:
                 self.solver.add(
-                    sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                    <= bound)
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    <= bound
+                )
             else:
-                #self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) <= bound
+                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) <= bound
                 self.solver.assert_and_track(
-                    sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                    <= bound, "LabelUpperLowerEqualBound" + str(self.labelIdx))
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    <= bound,
+                    "LabelUpperLowerEqualBound" + str(self.labelIdx),
+                )
                 self.labelIdx += 1
         elif operator == ">=":
             if self.solverTypeOptimize:
                 self.solver.add(
-                    sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                    >= bound)
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    >= bound
+                )
             else:
-                #self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) >= bound
+                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) >= bound
                 self.solver.assert_and_track(
-                    sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                    >= bound, "LabelUpperLowerEqualBound" + str(self.labelIdx))
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    >= bound,
+                    "LabelUpperLowerEqualBound" + str(self.labelIdx),
+                )
                 self.labelIdx += 1
         elif operator == "=":
             if self.solverTypeOptimize:
                 self.solver.add(
-                    sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                    == bound)
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    == bound
+                )
             else:
-                #self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) == bound
+                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) == bound
 
                 self.solver.assert_and_track(
-                    sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                    == bound, "LabelUpperLowerEqualBound" + str(self.labelIdx))
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    == bound,
+                    "LabelUpperLowerEqualBound" + str(self.labelIdx),
+                )
                 self.labelIdx += 1
         else:
             self.problem.logger.info("Unknown operator")
@@ -285,23 +679,75 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :param upperBound: a positive number
         :return:
         """
-        for i in range(len(compsIdList)): 
+        for i in range(len(compsIdList)):
             compsIdList[i] -= 1
             if self.solverTypeOptimize:
-                self.solver.add(sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                        >= lowerBound)
+                self.solver.add(
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    >= lowerBound
+                )
             else:
                 self.solver.assert_and_track(
-                    sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                        >= lowerBound, "LabelRangeBound: " + str(self.labelIdx))
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    >= lowerBound,
+                    "LabelRangeBound: " + str(self.labelIdx),
+                )
                 self.labelIdx += 1
             if self.solverTypeOptimize:
-                self.solver.add(sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                        <= upperBound)
+                self.solver.add(
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    <= upperBound
+                )
             else:
                 self.solver.assert_and_track(
-                    sum([self.a[compId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for compId in compsIdList for j in range(self.nrVM) for k in range(self.nrOffers)])
-                        <= upperBound, "LabelRangeBound: " + str(self.labelIdx))
+                    sum(
+                        [
+                            self.a[
+                                compId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    <= upperBound,
+                    "LabelRangeBound: " + str(self.labelIdx),
+                )
                 self.labelIdx += 1
 
     def RestrictionFullDeployment(self, alphaCompId, notInConflictCompsIdList):
@@ -312,19 +758,49 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :param notInConflictCompsIdList: the list of components that alphaCompId is not in conflict in
         :return: None
         """
-       
+
         for j in range(self.nrVM):
             for k in range(self.nrOffers):
                 self.solver.add(
-                    If(And(
-                        sum(self.a[i * self.nrOffers * self.nrVM + j * self.nrOffers + k] for i in range(self.nrComp)) >= 1,
-                        sum(self.a[i * self.nrOffers * self.nrVM + j * self.nrOffers + k] for i in notInConflictCompsIdList) == 0
-                    ), self.a[alphaCompId * self.nrOffers * self.nrVM + j * self.nrOffers + k] == 1,
-                       self.a[alphaCompId * self.nrOffers * self.nrVM + j * self.nrOffers + k] == 0
+                    If(
+                        And(
+                            sum(
+                                self.a[
+                                    i * self.nrOffers * self.nrVM
+                                    + j * self.nrOffers
+                                    + k
+                                ]
+                                for i in range(self.nrComp)
+                            )
+                            >= 1,
+                            sum(
+                                self.a[
+                                    i * self.nrOffers * self.nrVM
+                                    + j * self.nrOffers
+                                    + k
+                                ]
+                                for i in notInConflictCompsIdList
+                            )
+                            == 0,
+                        ),
+                        self.a[
+                            alphaCompId * self.nrOffers * self.nrVM
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        == 1,
+                        self.a[
+                            alphaCompId * self.nrOffers * self.nrVM
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        == 0,
                     )
                 )
 
-    def RestrictionRequireProvideDependency(self, alphaCompId, betaCompId, alphaCompIdInstances, betaCompIdInstances):
+    def RestrictionRequireProvideDependency(
+        self, alphaCompId, betaCompId, alphaCompIdInstances, betaCompIdInstances
+    ):
         """
         The number of instances of component alpha depends on the number of instances of component beta
         :param alphaCompId: id of the first component
@@ -337,18 +813,74 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         #                          "betaCompIdInstances={}".format(alphaCompId, betaCompId, alphaCompIdInstances, betaCompIdInstances))
 
         if self.solverTypeOptimize:
-            self.solver.add(Or(sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) == 0,
-                alphaCompIdInstances * sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) <=
-                betaCompIdInstances * sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)])))
+            self.solver.add(
+                Or(
+                    sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    == 0,
+                    alphaCompIdInstances
+                    * sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    <= betaCompIdInstances
+                    * sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    ),
+                )
+            )
         else:
-            self.__constMap["LabelRequireProvide: " + str(self.labelIdx)] = \
-                alphaCompIdInstances * sum([If(self.a[alphaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]) \
-                <= \
-                betaCompIdInstances * sum([If(self.a[betaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)])
+            self.__constMap[
+                "LabelRequireProvide: " + str(self.labelIdx)
+            ] = alphaCompIdInstances * sum(
+                [
+                    If(self.a[alphaCompId * self.nrVM + j], 1, 0)
+                    for j in range(self.nrVM)
+                ]
+            ) <= betaCompIdInstances * sum(
+                [If(self.a[betaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]
+            )
             self.solver.assert_and_track(
-                alphaCompIdInstances * sum([If(self.a[alphaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]) <=
-                betaCompIdInstances * sum([If(self.a[betaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]),
-                "LabelRequireProvide: " + str(self.labelIdx))
+                alphaCompIdInstances
+                * sum(
+                    [
+                        If(self.a[alphaCompId * self.nrVM + j], 1, 0)
+                        for j in range(self.nrVM)
+                    ]
+                )
+                <= betaCompIdInstances
+                * sum(
+                    [
+                        If(self.a[betaCompId * self.nrVM + j], 1, 0)
+                        for j in range(self.nrVM)
+                    ]
+                ),
+                "LabelRequireProvide: " + str(self.labelIdx),
+            )
             self.labelIdx += 1
 
     def RestrictionAlphaOrBeta(self, alphaCompId, betaCompId):
@@ -358,36 +890,158 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :param betaCompId: id of the second component
         :return:
         """
-        self.problem.logger.debug("RestrictionAlphaOrBeta: alphaCompId={}, betaCompId={}".format(alphaCompId, betaCompId))
+        self.problem.logger.debug(
+            "RestrictionAlphaOrBeta: alphaCompId={}, betaCompId={}".format(
+                alphaCompId, betaCompId
+            )
+        )
         if self.solverTypeOptimize:
-            self.solver.add(Or(sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) == 0,
-                               sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) >= 1))
+            self.solver.add(
+                Or(
+                    sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    == 0,
+                    sum(
+                        [
+                            self.a[
+                                betaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    >= 1,
+                )
+            )
 
-            self.solver.add(Or(sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) == 0,
-                               sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) >= 1))
+            self.solver.add(
+                Or(
+                    sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    == 0,
+                    sum(
+                        [
+                            self.a[
+                                alphaCompId * self.nrVM * self.nrOffers
+                                + j * self.nrOffers
+                                + k
+                            ]
+                            for j in range(self.nrVM)
+                            for k in range(self.nrOffers)
+                        ]
+                    )
+                    >= 1,
+                )
+            )
 
-            self.solver.add(sum([self.a[betaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) +
-                            sum([self.a[alphaCompId * self.nrVM * self.nrOffers + j * self.nrOffers + k] for j in range(self.nrVM) for k in range(self.nrOffers)]) >= 1)
+            self.solver.add(
+                sum(
+                    [
+                        self.a[
+                            betaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                + sum(
+                    [
+                        self.a[
+                            alphaCompId * self.nrVM * self.nrOffers
+                            + j * self.nrOffers
+                            + k
+                        ]
+                        for j in range(self.nrVM)
+                        for k in range(self.nrOffers)
+                    ]
+                )
+                >= 1
+            )
 
             # self.solver.add(
             #     Xor(sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]) == 0,
             #         sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)]) == 0, True))
         else:
             self.solver.assert_and_track(
-                Or(sum([If(self.a[betaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]) == 0,
-                   sum([If(self.a[betaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]) >= 1),
-                "LabelAlphaOrBeta: " + str(self.labelIdx))
+                Or(
+                    sum(
+                        [
+                            If(self.a[betaCompId * self.nrVM + j], 1, 0)
+                            for j in range(self.nrVM)
+                        ]
+                    )
+                    == 0,
+                    sum(
+                        [
+                            If(self.a[betaCompId * self.nrVM + j], 1, 0)
+                            for j in range(self.nrVM)
+                        ]
+                    )
+                    >= 1,
+                ),
+                "LabelAlphaOrBeta: " + str(self.labelIdx),
+            )
             self.labelIdx += 1
 
             self.solver.assert_and_track(
-                Or(sum([If(self.a[alphaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]) == 0,
-                   sum([If(self.a[alphaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]) >= 1),
-                "LabelAlphaOrBeta: " + str(self.labelIdx))
+                Or(
+                    sum(
+                        [
+                            If(self.a[alphaCompId * self.nrVM + j], 1, 0)
+                            for j in range(self.nrVM)
+                        ]
+                    )
+                    == 0,
+                    sum(
+                        [
+                            If(self.a[alphaCompId * self.nrVM + j], 1, 0)
+                            for j in range(self.nrVM)
+                        ]
+                    )
+                    >= 1,
+                ),
+                "LabelAlphaOrBeta: " + str(self.labelIdx),
+            )
             self.labelIdx += 1
 
-            self.solver.assert_and_track(sum([If(self.a[betaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]) +
-                                         sum([If(self.a[alphaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)])
-                                         >= 1, "LabelAlphaOrBeta: " + str(self.labelIdx))
+            self.solver.assert_and_track(
+                sum(
+                    [
+                        If(self.a[betaCompId * self.nrVM + j], 1, 0)
+                        for j in range(self.nrVM)
+                    ]
+                )
+                + sum(
+                    [
+                        If(self.a[alphaCompId * self.nrVM + j], 1, 0)
+                        for j in range(self.nrVM)
+                    ]
+                )
+                >= 1,
+                "LabelAlphaOrBeta: " + str(self.labelIdx),
+            )
             self.labelIdx += 1
 
     def createSMT2LIBFile(self, fileName):
@@ -396,11 +1050,12 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :param fileName: string representing the file name storing the SMT2LIB formulation of the problem
         :return:
         """
-        #with open(fileName, 'w+') as fo:
+        # with open(fileName, 'w+') as fo:
         #   fo.write("(set-logic QF_LIA)\n") # quantifier free linear integer-real arithmetic
-        #fo.close()
-        if fileName is None: return
-        with open(fileName, 'w+') as fo:
+        # fo.close()
+        if fileName is None:
+            return
+        with open(fileName, "w+") as fo:
             fo.write(self.solver.sexpr())
         fo.close()
 
@@ -412,13 +1067,14 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
         :param model: string representing key-values pairs for the variables in the model
         :return:
         """
-        if fileName is None: return
-        with open(fileName, 'w+') as foo:
-            foo.write(repr(status)+ '[\n')
+        if fileName is None:
+            return
+        with open(fileName, "w+") as foo:
+            foo.write(repr(status) + "[\n")
             for k in model:
-                foo.write('%s = %s, ' % (k, model[k]))
-                foo.write('\n')
-            foo.write(']')
+                foo.write("%s = %s, " % (k, model[k]))
+                foo.write("\n")
+            foo.write("]")
         foo.close()
 
     def convert_price(self, price):
@@ -453,34 +1109,41 @@ class Z3_Solver_Int_Parent_Form2(ManuverSolver):#ManeuverProblem):
 
         self.problem.logger.info("Z3 status: {}".format(status))
 
-
         if status == sat:
             model = self.solver.model()
             a_mat = []
             for i in range(self.nrComp):
                 l = []
-                #for k in range(self.nrVM):
+                # for k in range(self.nrVM):
                 #    for j in range(self.nrOffers):
-                        #l.append(model[self.a[i * self.nrVM * self.nrOffers + k * self.nrOffers + j]])
+                # l.append(model[self.a[i * self.nrVM * self.nrOffers + k * self.nrOffers + j]])
                 a_mat.append(l)
-            #print("Price for each machine")
+            # print("Price for each machine")
             vms_price = []
             for k in range(self.nrVM):
-                vms_price.append(int(self.convert_price(model[self.PriceProv[k]]) * 1000))
-            #print(vms_price)
-            #print("Type for each machine")
+                vms_price.append(
+                    int(self.convert_price(model[self.PriceProv[k]]) * 1000)
+                )
+            # print(vms_price)
+            # print("Type for each machine")
             vms_type = []
             for k in range(self.nrVM):
                 vms_type.append(model[self.vmType[k]])
-            #print(vms_type)
+            # print(vms_type)
         else:
             print(self.solver.unsat_core(), status)
         if self.solverTypeOptimize:
             if status == sat:
-                #print("a_mat", a_mat)
+                # print("a_mat", a_mat)
                 self.createSMT2LIBFileSolution(self.smt2libsol, status, model)
                 # do not return min.value() since the type is not comparable with -1 in the exposeRE
-                return self.convert_price(min.value()), vms_price, stoptime - startime, a_mat, vms_type
+                return (
+                    self.convert_price(min.value()),
+                    vms_price,
+                    stoptime - startime,
+                    a_mat,
+                    vms_type,
+                )
             else:
                 # unsat
                 return -1, None, None, None, None

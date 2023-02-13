@@ -7,6 +7,7 @@ This script constructs the conflict graph for a specific
 use-case scenario.
 """
 
+
 def solve_surrogate(model: str, scalable_components: list = []):
     """
     For a specific use-case, it solves the surrogate problem in order to get a list
@@ -21,8 +22,9 @@ def solve_surrogate(model: str, scalable_components: list = []):
         results (list): The output from the run
     """
     inst = prepare_surrogate_instance(model + "_Surrogate", scalable_components)
-            
+
     return inst.solve()
+
 
 def get_conflicts(model: str):
     """
@@ -37,7 +39,10 @@ def get_conflicts(model: str):
     """
     listOfConflicts = {}
 
-    with open(f"{src.init.settings['MiniZinc']['model_path']}/{model}_template.{src.init.settings['MiniZinc']['model_ext']}", "r") as modelFile:
+    with open(
+        f"{src.init.settings['MiniZinc']['model_path']}/{model}_template.{src.init.settings['MiniZinc']['model_ext']}",
+        "r",
+    ) as modelFile:
         lines = modelFile.readlines()
 
         for line in lines:
@@ -62,6 +67,7 @@ def get_conflicts(model: str):
                 listOfConflicts[component] = conflicts
 
     return listOfConflicts
+
 
 def getGraphComponents(model: str, scalable_components: list = []):
     """
@@ -92,10 +98,10 @@ def getGraphComponents(model: str, scalable_components: list = []):
     for i in range(len(result)):
         splitter = result[i].find("=")
         name = result[i][:splitter]
-        Cinst = int(result[i][splitter+1:])
+        Cinst = int(result[i][splitter + 1 :])
         components[name] = []
 
-        if not (name.find("LoadBalancer") != -1 and model=='Wordpress'):
+        if not (name.find("LoadBalancer") != -1 and model == "Wordpress"):
             for i in range(Cinst):
                 components[name].append(startIndex)
                 startIndex += 1
@@ -103,6 +109,7 @@ def getGraphComponents(model: str, scalable_components: list = []):
     conflicts = get_conflicts(model)
 
     return components, conflicts
+
 
 def buildConflictGraph(model: str, scalable_components: list = []):
     """
@@ -122,10 +129,9 @@ def buildConflictGraph(model: str, scalable_components: list = []):
 
     for value in elements[0].values():
         graph.add_nodes_from(value)
-    
+
     for start in elements[1].keys():
         for node in elements[0][start]:
-            
             # Add conflicts between different components
             for endPoint in elements[1][start]:
                 for endNode in elements[0][endPoint]:
@@ -133,7 +139,6 @@ def buildConflictGraph(model: str, scalable_components: list = []):
 
     for start in elements[0].values():
         for node in start:
-            
             # Add conflicts between instances of the same component
             instance = node + 1
             while instance in start:
@@ -141,6 +146,7 @@ def buildConflictGraph(model: str, scalable_components: list = []):
                 instance += 1
 
     return elements[0], graph
+
 
 def getMaxClique(model: str, scalable_components: list = []):
     """
@@ -165,7 +171,7 @@ def getMaxClique(model: str, scalable_components: list = []):
     #
     # Clique1 = {Wordpress}
     #               1
-    # 
+    #
     # Clique2 = {MySQL, Varnsih , ...}
     #               1 0 0 0 0 0 0 0
     #

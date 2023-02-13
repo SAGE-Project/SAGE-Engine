@@ -1,75 +1,89 @@
 import time
 from ortools.constraint_solver import pywrapcp
 
+
 class CP_Solver_Got_Nr_Instances:
     def __init__(self, problem, solver_type, nr_of_solution_limit):
         self.problem = problem
         self.nrComp = problem.nrComp
         self.option = solver_type
-        self.__optimizePrice = False  # variable used to add logic for price minimization
+        self.__optimizePrice = (
+            False  # variable used to add logic for price minimization
+        )
         self.__nr_of_solution_limit = nr_of_solution_limit
         self.__defineSolver(self.option)
 
-
     def __defineSolver(self, option):
-
         # define solver
         parameters = pywrapcp.Solver.DefaultSolverParameters()
         self.solver = pywrapcp.Solver("maneuver_CP_GOT_ll", parameters)
         self.cost = None
 
         # define some cut limits
-        time_limit = 50000# 4 minute
+        time_limit = 50000  # 4 minute
         branch_limit = 100000000
         failures_limit = 100000000
         solutions_limit = self.__nr_of_solution_limit  # 10000
-        self.limits = self.solver.Limit(time_limit, branch_limit, failures_limit, solutions_limit, True)
+        self.limits = self.solver.Limit(
+            time_limit, branch_limit, failures_limit, solutions_limit, True
+        )
 
         self.__defineVarinables()
 
-
         variables = self.components
         if option == "FIRST_UNBOUND_MIN":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_FIRST_UNBOUND,
-                                                      self.solver.ASSIGN_MIN_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables,
+                self.solver.CHOOSE_FIRST_UNBOUND,
+                self.solver.ASSIGN_MIN_VALUE,
+            )
         elif option == "FIRST_UNBOUND_MAX":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_FIRST_UNBOUND,
-                                                      self.solver.ASSIGN_MAX_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables,
+                self.solver.CHOOSE_FIRST_UNBOUND,
+                self.solver.ASSIGN_MAX_VALUE,
+            )
         elif option == "FIRST_UNBOUND_RANDOM":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_FIRST_UNBOUND,
-                                                      self.solver.ASSIGN_RANDOM_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables,
+                self.solver.CHOOSE_FIRST_UNBOUND,
+                self.solver.ASSIGN_RANDOM_VALUE,
+            )
         elif option == "LOWEST_MIN_MIN":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_LOWEST_MIN,
-                                                      self.solver.ASSIGN_MIN_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables, self.solver.CHOOSE_LOWEST_MIN, self.solver.ASSIGN_MIN_VALUE
+            )
         elif option == "LOWEST_MIN_MAX":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_LOWEST_MIN,
-                                                      self.solver.ASSIGN_MAX_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables, self.solver.CHOOSE_LOWEST_MIN, self.solver.ASSIGN_MAX_VALUE
+            )
         elif option == "LOWEST_MIN_RANDOM":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_LOWEST_MIN,
-                                                      self.solver.ASSIGN_RANDOM_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables,
+                self.solver.CHOOSE_LOWEST_MIN,
+                self.solver.ASSIGN_RANDOM_VALUE,
+            )
         elif option == "RANDOM_MIN":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_RANDOM,
-                                                      self.solver.ASSIGN_MIN_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables, self.solver.CHOOSE_RANDOM, self.solver.ASSIGN_MIN_VALUE
+            )
         elif option == "RANDOM_MAX":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_RANDOM,
-                                                      self.solver.ASSIGN_MAX_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables, self.solver.CHOOSE_RANDOM, self.solver.ASSIGN_MAX_VALUE
+            )
         elif option == "RANDOM_RANDOM":
-            self.decision_builder = self.solver.Phase(variables,
-                                                      self.solver.CHOOSE_RANDOM,
-                                                      self.solver.ASSIGN_RANDOM_VALUE)
+            self.decision_builder = self.solver.Phase(
+                variables, self.solver.CHOOSE_RANDOM, self.solver.ASSIGN_RANDOM_VALUE
+            )
 
     def __defineVarinables(self):
-        self.components = [self.solver.IntVar(0, 100000, "C%i" % j) for j in range(0, self.nrComp)]
-        self.cost = self.solver.IntVar(0, 1000000, 'cost')
-        self.solver.Add(self.cost == self.solver.Sum(component for component in self.components))
+        self.components = [
+            self.solver.IntVar(0, 100000, "C%i" % j) for j in range(0, self.nrComp)
+        ]
+        self.cost = self.solver.IntVar(0, 1000000, "cost")
+        self.solver.Add(
+            self.cost == self.solver.Sum(component for component in self.components)
+        )
 
     def RestrictionUpperLowerEqualBound(self, compsIdList, n1, operation):
         """
@@ -83,13 +97,19 @@ class CP_Solver_Got_Nr_Instances:
         """
         if operation == "<=":
             self.solver.Add(
-                self.solver.Sum([self.components[compId] for compId in compsIdList]) <= n1)
+                self.solver.Sum([self.components[compId] for compId in compsIdList])
+                <= n1
+            )
         elif operation == ">=":
             self.solver.Add(
-                self.solver.Sum([self.components[compId] for compId in compsIdList]) >= n1)
+                self.solver.Sum([self.components[compId] for compId in compsIdList])
+                >= n1
+            )
         elif operation == "==":
             self.solver.Add(
-                self.solver.Sum([self.components[compId] for compId in compsIdList]) == n1)
+                self.solver.Sum([self.components[compId] for compId in compsIdList])
+                == n1
+            )
 
     def RestrictionRangeBound(self, compsIdList, n1, n2):
         """
@@ -98,20 +118,23 @@ class CP_Solver_Got_Nr_Instances:
         :param n1: a positive lower limit for components number
         :param n2: a positive upper limit for components number
         """
-        self.solver.Add(self.solver.Sum([self.components[compId] for compId in compsIdList]) >= n1)
-        self.solver.Add(self.solver.Sum([self.components[compId] for compId in compsIdList]) <= n2)
-
+        self.solver.Add(
+            self.solver.Sum([self.components[compId] for compId in compsIdList]) >= n1
+        )
+        self.solver.Add(
+            self.solver.Sum([self.components[compId] for compId in compsIdList]) <= n2
+        )
 
     def RestrictionManyToManyDependency(self, alphaCompId, betaCompId, operation):
         """
-       The number of instance of component alpha depends on the number of instances of component beta
-       :param alphaCompId: ID of component alpha, ID should be in set {1,...,N}
-       :param betaCompId: ID of component beta, ID should be in set {1,...,N}
-       :param operation: one of the strings in set {"==", "<=", ">="}
-           "==": sum(instances of alpha component) == sum(instances of beta component)
-           "<=": sum(instances of alpha component) <= sum(instances of beta component)
-           ">=": sum(instances of alpha component) >= sum(instances of beta component)
-       :return: None
+        The number of instance of component alpha depends on the number of instances of component beta
+        :param alphaCompId: ID of component alpha, ID should be in set {1,...,N}
+        :param betaCompId: ID of component beta, ID should be in set {1,...,N}
+        :param operation: one of the strings in set {"==", "<=", ">="}
+            "==": sum(instances of alpha component) == sum(instances of beta component)
+            "<=": sum(instances of alpha component) <= sum(instances of beta component)
+            ">=": sum(instances of alpha component) >= sum(instances of beta component)
+        :return: None
         """
         if operation == "<=":
             self.solver.Add(self.components[alphaCompId] <= self.components[betaCompId])
@@ -128,19 +151,30 @@ class CP_Solver_Got_Nr_Instances:
         :param n: depending instances number
         :return:python /Applications/CPLEX_Studio1210/python/setup.py install
         """
-        self.solver.Add(n * self.components[alphaCompId] - self.components[betaCompId] > 0)
-        self.solver.Add(n * self.components[alphaCompId] - self.components[betaCompId] <= n)
+        self.solver.Add(
+            n * self.components[alphaCompId] - self.components[betaCompId] > 0
+        )
+        self.solver.Add(
+            n * self.components[alphaCompId] - self.components[betaCompId] <= n
+        )
 
     def RestrictionAlphaOrBeta(self, alphaCompId, betaCompId):
-        self.solver.Add(self.solver.Sum([self.components[alphaCompId] > 0, self.components[betaCompId] > 0]) == 1)
+        self.solver.Add(
+            self.solver.Sum(
+                [self.components[alphaCompId] > 0, self.components[betaCompId] > 0]
+            )
+            == 1
+        )
 
     def RestrictionRequireProvideDependency(self, alphaCompId, betaCompId, n, m):
-        #print(self.solver)
-        self.solver.Add(n * self.components[alphaCompId] * (self.components[betaCompId] > 0) <= m * self.components[betaCompId])
+        # print(self.solver)
+        self.solver.Add(
+            n * self.components[alphaCompId] * (self.components[betaCompId] > 0)
+            <= m * self.components[betaCompId]
+        )
 
-        #self.solver.Add(Or(self.components[betaCompId] == 0, n * self.components[alphaCompId] <= m * self.components[betaCompId]))
-        #self.solver.AddBoolOr(self.components[betaCompId] == 0, n * self.components[alphaCompId] <= m * self.components[betaCompId])
-
+        # self.solver.Add(Or(self.components[betaCompId] == 0, n * self.components[alphaCompId] <= m * self.components[betaCompId]))
+        # self.solver.AddBoolOr(self.components[betaCompId] == 0, n * self.components[alphaCompId] <= m * self.components[betaCompId])
 
     def __runMinimizationProblem(self):
         """
@@ -158,7 +192,9 @@ class CP_Solver_Got_Nr_Instances:
         self.collector.AddObjective(self.cost)
 
         startTime = time.process_time()
-        self.solver.Solve(self.decision_builder, [self.limits, self.objective, self.collector])
+        self.solver.Solve(
+            self.decision_builder, [self.limits, self.objective, self.collector]
+        )
         stopTime = time.process_time()
         return startTime, stopTime
 
@@ -173,7 +209,7 @@ class CP_Solver_Got_Nr_Instances:
         self.collector.Add(self.components)
 
         startTime = time.process_time()
-        self.solver.Solve(self.decision_builder, [self.limits,  self.collector])
+        self.solver.Solve(self.decision_builder, [self.limits, self.collector])
         stopTime = time.process_time()
 
         return startTime, stopTime
@@ -187,7 +223,6 @@ class CP_Solver_Got_Nr_Instances:
         return _components
 
     def run(self):
-
         startTime, stopTime = self.__runMinimizationProblem()
 
         _components = []
@@ -198,11 +233,11 @@ class CP_Solver_Got_Nr_Instances:
 
         # self.NUMARUL_DE_CONFIGURATII
 
-        self.problem.logger.debug("Nr of instances for each component: {}".format(_components))
+        self.problem.logger.debug(
+            "Nr of instances for each component: {}".format(_components)
+        )
 
-        return (stopTime - startTime),  _components
-
-
+        return (stopTime - startTime), _components
 
     def RestrictionConflict(self, comp_id, conflict_comps_id_list):
         return
@@ -216,5 +251,7 @@ class CP_Solver_Got_Nr_Instances:
     def RestrictionFullDeployment(self, compId, compsIdList):
         return
 
-    def RestrictionManyToManyDependencyNew(self,  alphaCompId, betaCompId, n,m):
-        self.solver.Add(m*self.components[betaCompId] - n*self.components[alphaCompId] >= 0)
+    def RestrictionManyToManyDependencyNew(self, alphaCompId, betaCompId, n, m):
+        self.solver.Add(
+            m * self.components[betaCompId] - n * self.components[alphaCompId] >= 0
+        )

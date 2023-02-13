@@ -6,20 +6,31 @@ import src.smt
 
 class Wrapper_:
     def solve(
-            self, application_model_json,
-            offers_json, symmetry_breaker="FVPR",
-            inst=0, solver_id="z3"
+        self,
+        application_model_json,
+        offers_json,
+        symmetry_breaker="FVPR",
+        inst=0,
+        solver_id="z3",
     ):
         SMTsolver = src.smt.getSolver(solver_id)
         availableConfigurations = []
         for key, value in offers_json.items():
-            specs_list = [key, value["cpu"], value["memory"], value["storage"], value["price"]]
+            specs_list = [
+                key,
+                value["cpu"],
+                value["memory"],
+                value["storage"],
+                value["price"],
+            ]
             availableConfigurations.append(specs_list)
 
         problem = ManeuverProblem()
-        problem.readConfigurationJSON(application_model_json, availableConfigurations, inst)
+        problem.readConfigurationJSON(
+            application_model_json, availableConfigurations, inst
+        )
 
-        SMTsolver.init_problem(problem, 'optimize', sb_option=symmetry_breaker)
+        SMTsolver.init_problem(problem, "optimize", sb_option=symmetry_breaker)
         price, distr, runtime, a_mat, vms_type = SMTsolver.run()
 
         if not runtime or runtime > 2400:
@@ -49,10 +60,10 @@ class Wrapper_:
 
 wrapper = Wrapper_()
 
-with open('Models/json/Wordpress.json', 'r') as file:
+with open("Models/json/Wordpress.json", "r") as file:
     application = json.load(file)
 
-with open('Data/json/offers_20.json', 'r') as file:
+with open("Data/json/offers_20.json", "r") as file:
     offers_20 = json.load(file)
 
 result = wrapper.solve(application, offers_20, inst=3)

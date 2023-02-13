@@ -7,6 +7,7 @@ This script constructs the conflict graph for a specific
 use-case scenario.
 """
 
+
 def solve_surrogate(model: str, comp: str = None, inst: int = None):
     """
     For a specific use-case, it solves the surrogate problem in order to get a list
@@ -23,8 +24,9 @@ def solve_surrogate(model: str, comp: str = None, inst: int = None):
 
     if comp != None:
         IInst[comp] = inst
-        
+
     return IInst.solve()
+
 
 def get_conflicts(model: str):
     """
@@ -59,6 +61,7 @@ def get_conflicts(model: str):
 
     return listOfConflicts
 
+
 def getGraphComponents(model: str, comp: str = None, inst: int = 0):
     """
     Gets the list of component and their instances, as well as the list of conflicts between
@@ -84,11 +87,11 @@ def getGraphComponents(model: str, comp: str = None, inst: int = 0):
     for i in range(len(result)):
         splitter = result[i].find("=")
         name = result[i][:splitter]
-        Cinst = int(result[i][splitter+1:])
+        Cinst = int(result[i][splitter + 1 :])
 
         components[name] = []
 
-        if not (name.find("LoadBalancer") != -1 and model=='Wordpress' and inst < 8):
+        if not (name.find("LoadBalancer") != -1 and model == "Wordpress" and inst < 8):
             for i in range(Cinst):
                 components[name].append(startIndex)
                 startIndex += 1
@@ -96,6 +99,7 @@ def getGraphComponents(model: str, comp: str = None, inst: int = 0):
     conflicts = get_conflicts(model)
 
     return components, conflicts
+
 
 def buildConflictGraph(model: str, comp: str = None, inst: int = 0):
     """
@@ -107,10 +111,9 @@ def buildConflictGraph(model: str, comp: str = None, inst: int = 0):
 
     for value in elements[0].values():
         graph.add_nodes_from(value)
-    
+
     for start in elements[1].keys():
         for node in elements[0][start]:
-            
             # Add conflicts between different components
             for endPoint in elements[1][start]:
                 for endNode in elements[0][endPoint]:
@@ -118,7 +121,6 @@ def buildConflictGraph(model: str, comp: str = None, inst: int = 0):
 
     for start in elements[0].values():
         for node in start:
-            
             # Add conflicts between instances of the same component
             instance = node + 1
             while instance in start:
@@ -126,6 +128,7 @@ def buildConflictGraph(model: str, comp: str = None, inst: int = 0):
                 instance += 1
 
     return elements[0], graph
+
 
 def buildConflictGraph(elements):
     """
@@ -135,10 +138,9 @@ def buildConflictGraph(elements):
 
     for value in elements[0].values():
         graph.add_nodes_from(value)
-    
+
     for start in elements[1].keys():
         for node in elements[0][start]:
-            
             # Add conflicts between different components
             for endPoint in elements[1][start]:
                 for endNode in elements[0][endPoint]:
@@ -146,7 +148,6 @@ def buildConflictGraph(elements):
 
     for start in elements[0].values():
         for node in start:
-            
             # Add conflicts between instances of the same component
             instance = node + 1
             while instance in start:
@@ -171,7 +172,7 @@ def getMaxClique(model: str, comp: str = None, inst: int = 0):
     #
     # Clique1 = {Wordpress}
     #               1
-    # 
+    #
     # Clique2 = {MySQL, Varnsih , ...}
     #               1 0 0 0 0 0 0 0
     #
@@ -212,6 +213,7 @@ def getMaxClique(model: str, comp: str = None, inst: int = 0):
 
     return dictionary, final_cliques[0]
 
+
 def getMaxClique(elements):
     """
     Returns the clique with maximum deployment size as well as a
@@ -227,7 +229,7 @@ def getMaxClique(elements):
     #
     # Clique1 = {Wordpress}
     #               1
-    # 
+    #
     # Clique2 = {MySQL, Varnsih , ...}
     #               1 0 0 0 0 0 0 0
     #

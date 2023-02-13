@@ -1,13 +1,17 @@
 import docplex.mp.model as cpx
 import docplex.util
-from docplex.mp.conflict_refiner import ConflictRefiner, VarUbConstraintWrapper, VarLbConstraintWrapper
+from docplex.mp.conflict_refiner import (
+    ConflictRefiner,
+    VarUbConstraintWrapper,
+    VarLbConstraintWrapper,
+)
 import time
-from docplex.mp.functional import  LogicalAndExpr
+from docplex.mp.functional import LogicalAndExpr
 from Solvers.Core.ManuverSolver import ManuverSolver
- 
+
+
 class CPlex_Solver_Parent(ManuverSolver):
     def _initSolver(self):
-
         self.orCntIndex = 0
 
         self.nr_vms = self.problem.nrVM
@@ -19,27 +23,27 @@ class CPlex_Solver_Parent(ManuverSolver):
         self.model.parameters.timelimit.set(2400.0)
         ### Option: reduce-set-lpmethod-default-s-b:
         # http://www-eio.upc.es/lceio/manuals/cplex-11/html/refparameterscplex/refparameterscplex103.html#271905
-        #self.model.parameters.preprocessing.reduce.set(1)
+        # self.model.parameters.preprocessing.reduce.set(1)
         # print(self.model.parameters.lpmethod)
         # self.model.parameters.lpmethod =3
         # print(self.model.parameters.lpmethod)
         ### sym breaking options
         ### Option: 0 no-s-b
-        #self.model.parameters.preprocessing.symmetry = 0
+        # self.model.parameters.preprocessing.symmetry = 0
         ### Option: 1 Exert a moderate level of symmetry breaking
         self.model.parameters.preprocessing.symmetry = 1
         # ### Option: 2 Exert an aggressive level of symmetry breaking
-        #self.model.parameters.preprocessing.symmetry = 2
+        # self.model.parameters.preprocessing.symmetry = 2
         # ### Option: 3 Exert a very aggressive level of symmetry breaking
-        #self.model.parameters.preprocessing.symmetry = 1
+        # self.model.parameters.preprocessing.symmetry = 1
         # ### Option: 4 Exert a highly aggressive level of symmetry breaking
-        #self.model.parameters.preprocessing.symmetry = 4
+        # self.model.parameters.preprocessing.symmetry = 4
         # ### Option: 5 Exert an extremely aggressive level of symmetry breaking
-        #self.model.parameters.preprocessing.symmetry = 5
+        # self.model.parameters.preprocessing.symmetry = 5
 
-        #0-default CPX_ALG_AUTOMATIC
-        #2-CPX_ALG_DUAL
-        #3-CPX_ALG_NET
+        # 0-default CPX_ALG_AUTOMATIC
+        # 2-CPX_ALG_DUAL
+        # 3-CPX_ALG_NET
 
         # CPXPARAM_Preprocessing_Reduce
         # 1
@@ -81,13 +85,16 @@ class CPlex_Solver_Parent(ManuverSolver):
         xx = self.model.solve()
         stoptime = time.time()
 
-        if docplex.util.status.JobSolveStatus.OPTIMAL_SOLUTION == self.model.get_solve_status():
+        if (
+            docplex.util.status.JobSolveStatus.OPTIMAL_SOLUTION
+            == self.model.get_solve_status()
+        ):
             # Variables for offers description
             vmType = self._get_solution_vm_type()
 
             for var in self.PriceProv:
                 vmPrice.append(int(self.model.solution.get_value(f"PriceProv{var+1}")))
-            #print(vmPrice)
+            # print(vmPrice)
 
             l = []
             col = 0
@@ -108,16 +115,14 @@ class CPlex_Solver_Parent(ManuverSolver):
                 ct = conflict.element
                 label = conflict.name
                 label_type = type(conflict.element)
-                if isinstance(conflict.element, VarLbConstraintWrapper)\
-                        or isinstance(conflict.element, VarUbConstraintWrapper):
+                if isinstance(conflict.element, VarLbConstraintWrapper) or isinstance(
+                    conflict.element, VarUbConstraintWrapper
+                ):
                     ct = conflict.element.get_constraint()
                 # Print conflict information in console
 
         return xx.get_objective_value(), vmPrice, stoptime - starttime, a_mat, vmType
         # return None, None, stoptime - starttime, None, None
-
-
-
 
     def RestrictionLex(self, vm_id, additional_constraints=[]):
         """
@@ -150,8 +155,6 @@ class CPlex_Solver_Parent(ManuverSolver):
             else:
                 self.model.add_constraint(ct=self.a[i, vm_id] >= self.a[i, vm_id + 1])
 
-
-
     def RestrictionPrice(self, vm_id, additional_constraints=[]):
         """
         Lexicografic order between two consecutive columns
@@ -160,17 +163,21 @@ class CPlex_Solver_Parent(ManuverSolver):
         :return:
         """
         if len(additional_constraints) == 0:
-            self.model.add_constraint(ct=self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1], ctname="price_order")
+            self.model.add_constraint(
+                ct=self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1],
+                ctname="price_order",
+            )
         else:
             var = self.model.binary_var(name="order_VM{0}_combined".format(vm_id))
             if len(additional_constraints) == 1:
                 self.model.add_equivalence(var, additional_constraints[0])
             else:
                 self.model.add_equivalence(var, LogicalAndExpr(additional_constraints))
-            self.model.add_indicator(var, self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1])
+            self.model.add_indicator(
+                var, self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1]
+            )
 
         return self.PriceProv[vm_id] == self.PriceProv[vm_id + 1]
-
 
     def RestrictionFixComponentOnVM(self, comp_id, vm_id, value=1):
         """
@@ -180,7 +187,9 @@ class CPlex_Solver_Parent(ManuverSolver):
         :param value: 1 assigned; 0 unassigned
         :return: None
         """
-        self.model.add_constraint(ct=self.a[comp_id, vm_id] == value, ctname="a_c_fix_component")
+        self.model.add_constraint(
+            ct=self.a[comp_id, vm_id] == value, ctname="a_c_fix_component"
+        )
 
     def RestrictionLoad(self, vm_id, additional_constraints=[]):
         """
@@ -191,20 +200,26 @@ class CPlex_Solver_Parent(ManuverSolver):
         """
 
         if len(additional_constraints) == 0:
-            self.model.add_constraint(ct=sum([self.a[i, vm_id] for i in range(0, self.nr_comps)]) >= sum(
-                [self.a[i, vm_id + 1] for i in range(0, self.nr_comps)]), ctname="c_vm_load_lex_order")
+            self.model.add_constraint(
+                ct=sum([self.a[i, vm_id] for i in range(0, self.nr_comps)])
+                >= sum([self.a[i, vm_id + 1] for i in range(0, self.nr_comps)]),
+                ctname="c_vm_load_lex_order",
+            )
         else:
             var = self.model.binary_var(name="vmload_VM{0}_combined".format(vm_id))
             if len(additional_constraints) == 1:
                 self.model.add_equivalence(var, additional_constraints[0])
             else:
                 self.model.add_equivalence(var, LogicalAndExpr(additional_constraints))
-            self.model.add_indicator(var, sum([self.a[i, vm_id] for i in range(0, self.nr_comps)]) >= sum(
-                [self.a[i, vm_id + 1] for i in range(0, self.nr_comps)]))
+            self.model.add_indicator(
+                var,
+                sum([self.a[i, vm_id] for i in range(0, self.nr_comps)])
+                >= sum([self.a[i, vm_id + 1] for i in range(0, self.nr_comps)]),
+            )
 
-        return sum([self.a[i, vm_id] for i in range(self.nr_comps)]) == \
-               sum([self.a[i, vm_id + 1] for i in range(self.nr_comps)])
-
+        return sum([self.a[i, vm_id] for i in range(self.nr_comps)]) == sum(
+            [self.a[i, vm_id + 1] for i in range(self.nr_comps)]
+        )
 
     def RestrictionConflict(self, alphaCompId, conflictCompsIdList):
         """
@@ -217,13 +232,18 @@ class CPlex_Solver_Parent(ManuverSolver):
             compId += 1
 
         self.problem.logger.debug(
-            "RestrictionConflict: alphaCompId = {} conflictComponentsList = {}".format(alphaCompId,
-                                                                                       conflictCompsIdList))
+            "RestrictionConflict: alphaCompId = {} conflictComponentsList = {}".format(
+                alphaCompId, conflictCompsIdList
+            )
+        )
         for j in range(self.nr_vms):
             for k in range(self.nrOffers):
                 for conflictCompId in conflictCompsIdList:
-                    self.model.add_constraint(ct=self.a[alphaCompId, j, k] + self.a[conflictCompId, j, k] <= 1,
-                                            ctname="c_comp_conflict")
+                    self.model.add_constraint(
+                        ct=self.a[alphaCompId, j, k] + self.a[conflictCompId, j, k]
+                        <= 1,
+                        ctname="c_comp_conflict",
+                    )
 
     def RestrictionOneToOneDependency(self, alphaCompId, betaCompId):
         """
@@ -233,8 +253,11 @@ class CPlex_Solver_Parent(ManuverSolver):
         :return: None
         """
         for j in range(self.nr_vms):
-            self.model.add_constraint(ct=sum(self.a[alphaCompId, j, k] for k in range(self.nrOffers)) == sum(self.a[betaCompId, j, k] for k in range(self.nrOffers)),
-                                      ctname="c_one_2_one_dependency")
+            self.model.add_constraint(
+                ct=sum(self.a[alphaCompId, j, k] for k in range(self.nrOffers))
+                == sum(self.a[betaCompId, j, k] for k in range(self.nrOffers)),
+                ctname="c_one_2_one_dependency",
+            )
 
     def RestrictionManyToManyDependency(self, alphaCompId, betaCompId, relation):
         """
@@ -248,19 +271,49 @@ class CPlex_Solver_Parent(ManuverSolver):
         :return: None
         """
         if relation == "<=":
-            self.model.add_constraint(ct=self.model.sum(self.a[alphaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) <=
-                                      self.model.sum(self.a[betaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)),
-                                      ctname="c_many_2_many_dependency_le")
+            self.model.add_constraint(
+                ct=self.model.sum(
+                    self.a[alphaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                <= self.model.sum(
+                    self.a[betaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                ),
+                ctname="c_many_2_many_dependency_le",
+            )
 
         elif relation == ">=":
-            self.model.add_constraint(ct=self.model.sum(self.a[alphaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) >=
-                                      self.model.sum(self.a[betaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)),
-                                      ctname="c_many_2_many_dependency_ge")
+            self.model.add_constraint(
+                ct=self.model.sum(
+                    self.a[alphaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                >= self.model.sum(
+                    self.a[betaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                ),
+                ctname="c_many_2_many_dependency_ge",
+            )
 
         elif relation == "=":
-            self.model.add_constraint(ct=self.model.sum(self.a[alphaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) ==
-                                      self.model.sum(self.a[betaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)),
-                                      ctname="c_many_2_many_dependency_eq")
+            self.model.add_constraint(
+                ct=self.model.sum(
+                    self.a[alphaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                == self.model.sum(
+                    self.a[betaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                ),
+                ctname="c_many_2_many_dependency_eq",
+            )
 
     def RestrictionOneToManyDependency(self, alphaCompId, betaCompId, noInstances):
         """
@@ -271,14 +324,37 @@ class CPlex_Solver_Parent(ManuverSolver):
         :return: None
         """
 
-        self.model.add_constraint(ct=
-                                  noInstances * self.model.sum(self.a[alphaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) -
-                                  self.model.sum(self.a[betaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) >= 1,
-                                  ctname="c_one_2_many_dependency_p1")
+        self.model.add_constraint(
+            ct=noInstances
+            * self.model.sum(
+                self.a[alphaCompId, j, k]
+                for j in range(self.nr_vms)
+                for k in range(self.nrOffers)
+            )
+            - self.model.sum(
+                self.a[betaCompId, j, k]
+                for j in range(self.nr_vms)
+                for k in range(self.nrOffers)
+            )
+            >= 1,
+            ctname="c_one_2_many_dependency_p1",
+        )
 
-        self.model.add_constraint(ct=noInstances * self.model.sum(self.a[alphaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) -
-                                     self.model.sum(self.a[betaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) <= noInstances,
-                                  ctname="c_one_2_many_dependency_p1")
+        self.model.add_constraint(
+            ct=noInstances
+            * self.model.sum(
+                self.a[alphaCompId, j, k]
+                for j in range(self.nr_vms)
+                for k in range(self.nrOffers)
+            )
+            - self.model.sum(
+                self.a[betaCompId, j, k]
+                for j in range(self.nr_vms)
+                for k in range(self.nrOffers)
+            )
+            <= noInstances,
+            ctname="c_one_2_many_dependency_p1",
+        )
 
     def RestrictionUpperLowerEqualBound(self, compsIdList, bound, operator):
         """
@@ -292,22 +368,47 @@ class CPlex_Solver_Parent(ManuverSolver):
         :return: None
         """
 
-        self.problem.logger.debug("RestrictionUpperLowerEqualBound: {} {} {} ".format(compsIdList, operator, bound))
+        self.problem.logger.debug(
+            "RestrictionUpperLowerEqualBound: {} {} {} ".format(
+                compsIdList, operator, bound
+            )
+        )
 
         if operator == "<=":
             self.model.add_constraint(
-                ct=self.model.sum(self.a[compId, j, k] for compId in compsIdList for j in range(self.nr_vms) for k in range(self.nrOffers)) <= bound,
-                ctname="c_upper_lower_bound")
+                ct=self.model.sum(
+                    self.a[compId, j, k]
+                    for compId in compsIdList
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                <= bound,
+                ctname="c_upper_lower_bound",
+            )
 
         elif operator == ">=":
             self.model.add_constraint(
-                ct=self.model.sum(self.a[compId, j, k] for compId in compsIdList for j in range(self.nr_vms) for k in range(self.nrOffers)) >= bound,
-                ctname="c_upper_lower_bound")
+                ct=self.model.sum(
+                    self.a[compId, j, k]
+                    for compId in compsIdList
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                >= bound,
+                ctname="c_upper_lower_bound",
+            )
 
         elif operator == "=":
             self.model.add_constraint(
-                ct=self.model.sum(self.a[compId, j, k] for compId in compsIdList for j in range(self.nr_vms) for k in range(self.nrOffers)) == bound,
-                ctname="c_upper_lower_bound")
+                ct=self.model.sum(
+                    self.a[compId, j, k]
+                    for compId in compsIdList
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                == bound,
+                ctname="c_upper_lower_bound",
+            )
         else:
             self.problem.logger.info("Unknown operator")
 
@@ -319,14 +420,28 @@ class CPlex_Solver_Parent(ManuverSolver):
         :param upperBound: a positive number
         :return:
         """
-        for i in range(len(compsIdList)): 
+        for i in range(len(compsIdList)):
             compsIdList[i] -= 1
             self.model.add_constraint(
-                ct=self.model.sum(self.a[compId, j, k] for compId in compsIdList for j in range(self.nr_vms) for k in range(self.nrOffers)) >= lowerBound,
-                ctname="c_range_bound")
+                ct=self.model.sum(
+                    self.a[compId, j, k]
+                    for compId in compsIdList
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                >= lowerBound,
+                ctname="c_range_bound",
+            )
             self.model.add_constraint(
-                ct=self.model.sum(self.a[compId, j, k] for compId in compsIdList for j in range(self.nr_vms) for k in range(self.nrOffers)) <= upperBound,
-                ctname="c_range_bound")
+                ct=self.model.sum(
+                    self.a[compId, j, k]
+                    for compId in compsIdList
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                <= upperBound,
+                ctname="c_range_bound",
+            )
 
     def RestrictionFullDeployment(self, alphaCompId, inConflictCompsIdList):
         """
@@ -339,16 +454,28 @@ class CPlex_Solver_Parent(ManuverSolver):
         for j in range(self.nr_vms):
             for k in range(self.nrOffers):
                 self.model.logical_and(
-                    self.model.logical_and(self.model.sum(self.a[i, j, k] for i in range(self.nr_comps)) >= 1, self.model.sum(self.a[i,j,k] for i in inConflictCompsIdList) == 0),
-                    self.a[alphaCompId,j,k] == 1
+                    self.model.logical_and(
+                        self.model.sum(self.a[i, j, k] for i in range(self.nr_comps))
+                        >= 1,
+                        self.model.sum(self.a[i, j, k] for i in inConflictCompsIdList)
+                        == 0,
+                    ),
+                    self.a[alphaCompId, j, k] == 1,
                 )
 
                 self.model.logical_and(
-                    self.model.logical_or(self.model.sum(self.a[i, j, k] for i in range(self.nr_comps)) == 0, self.model.sum(self.a[i,j,k] for i in inConflictCompsIdList) >= 1),
-                    self.a[alphaCompId,j,k] == 0,
+                    self.model.logical_or(
+                        self.model.sum(self.a[i, j, k] for i in range(self.nr_comps))
+                        == 0,
+                        self.model.sum(self.a[i, j, k] for i in inConflictCompsIdList)
+                        >= 1,
+                    ),
+                    self.a[alphaCompId, j, k] == 0,
                 )
 
-    def RestrictionRequireProvideDependency(self, alphaCompId, betaCompId, alphaCompIdInstances, betaCompIdInstances):
+    def RestrictionRequireProvideDependency(
+        self, alphaCompId, betaCompId, alphaCompIdInstances, betaCompIdInstances
+    ):
         """
         The number of instances of component alpha depends on the number of instances of component beta
         :param alphaCompId: id of the first component
@@ -358,9 +485,28 @@ class CPlex_Solver_Parent(ManuverSolver):
         :return: None
         """
         self.model.add_constraint(
-            ct=self.model.logical_or(alphaCompIdInstances * self.model.sum(self.a[alphaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) <=
-               betaCompIdInstances * self.model.sum(self.a[betaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)), self.model.sum(self.a[betaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) == 0),
-            ctname="c_provide_require")
+            ct=self.model.logical_or(
+                alphaCompIdInstances
+                * self.model.sum(
+                    self.a[alphaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                <= betaCompIdInstances
+                * self.model.sum(
+                    self.a[betaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                ),
+                self.model.sum(
+                    self.a[betaCompId, j, k]
+                    for j in range(self.nr_vms)
+                    for k in range(self.nrOffers)
+                )
+                == 0,
+            ),
+            ctname="c_provide_require",
+        )
 
     def RestrictionAlphaOrBeta(self, alphaCompId, betaCompId):
         """
@@ -370,20 +516,40 @@ class CPlex_Solver_Parent(ManuverSolver):
         :return:
         """
         self.problem.logger.debug(
-            "RestrictionAlphaOrBeta: alphaCompId={}, betaCompId={}".format(alphaCompId, betaCompId))
+            "RestrictionAlphaOrBeta: alphaCompId={}, betaCompId={}".format(
+                alphaCompId, betaCompId
+            )
+        )
 
         alphaSum = self.model.binary_var(name="alphaSum{0}".format(self.orCntIndex))
         betaSum = self.model.binary_var(name="betaSum{0}".format(self.orCntIndex))
 
         self.orCntIndex += 1
 
-        self.model.add_equivalence(alphaSum, self.model.sum(self.a[alphaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) >= 1,
-                                   name="c_or_alpha")
-        self.model.add_equivalence(betaSum, self.model.sum(self.a[betaCompId, j, k] for j in range(self.nr_vms) for k in range(self.nrOffers)) >= 1,
-                                   name="c_or_beta")
+        self.model.add_equivalence(
+            alphaSum,
+            self.model.sum(
+                self.a[alphaCompId, j, k]
+                for j in range(self.nr_vms)
+                for k in range(self.nrOffers)
+            )
+            >= 1,
+            name="c_or_alpha",
+        )
+        self.model.add_equivalence(
+            betaSum,
+            self.model.sum(
+                self.a[betaCompId, j, k]
+                for j in range(self.nr_vms)
+                for k in range(self.nrOffers)
+            )
+            >= 1,
+            name="c_or_beta",
+        )
 
-        self.model.add_constraint(ct=self.model.sum([alphaSum, betaSum]) == 1, ctname="c_or")
-
+        self.model.add_constraint(
+            ct=self.model.sum([alphaSum, betaSum]) == 1, ctname="c_or"
+        )
 
     def RestrictionLexBinaryNumber(self):
         """
@@ -398,9 +564,20 @@ class CPlex_Solver_Parent(ManuverSolver):
         n = n - 1
         for vm_id in range(self.nrVM - 1):
             self.model.add_constraint(
-                self.model.sum([self.a[list_comps[i], vm_id] * (2 ** (i)) for i in range(len(list_comps))]) <=
-                self.model.sum([self.a[list_comps[i], vm_id + 1] * (2 ** (i)) for i in range(len(list_comps))]),
-                ctname="binayr_flav")
+                self.model.sum(
+                    [
+                        self.a[list_comps[i], vm_id] * (2 ** (i))
+                        for i in range(len(list_comps))
+                    ]
+                )
+                <= self.model.sum(
+                    [
+                        self.a[list_comps[i], vm_id + 1] * (2 ** (i))
+                        for i in range(len(list_comps))
+                    ]
+                ),
+                ctname="binayr_flav",
+            )
 
     def _get_solution_vm_type(self):
         print("Get from subclass")

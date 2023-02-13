@@ -9,6 +9,7 @@ The script generates the required constraints which are to be added for the resp
 symmetry breaker.
 """
 
+
 def addBreakerConstraint(symmetry_breaker: str = None, start: int = 0):
     """
     Constructs the constraint for symmetry breakers other than FV.
@@ -21,7 +22,9 @@ def addBreakerConstraint(symmetry_breaker: str = None, start: int = 0):
         constraint (str): The constraint to be added to the model.
     """
 
-    with open(f"{src.init.settings['MiniZinc']['symmetry_breaking_config']}", "r") as file:
+    with open(
+        f"{src.init.settings['MiniZinc']['symmetry_breaking_config']}", "r"
+    ) as file:
         settings = load(file)
 
     constraint = None
@@ -34,7 +37,10 @@ def addBreakerConstraint(symmetry_breaker: str = None, start: int = 0):
 
     return constraint
 
-def buildComponentConstraints(component: str, inst: int, startVM: int, Clist: list = []):
+
+def buildComponentConstraints(
+    component: str, inst: int, startVM: int, Clist: list = []
+):
     """
     Returns the list of constraints for setting the FV script
     for a specific component.
@@ -53,17 +59,18 @@ def buildComponentConstraints(component: str, inst: int, startVM: int, Clist: li
     endVM = startVM + inst
     constraints = []
 
-    for i in range (inst):
+    for i in range(inst):
         constraint = f"constraint AssignmentMatrix[{component},{startVM+i+1}] = 1;\n"
         constraints.append(constraint)
 
     for i in range(inst):
         for c in Clist:
             if component != c:
-                constraints.append(f"constraint AssignmentMatrix[{c}, {startVM+i+1}] = 0;\n")
+                constraints.append(
+                    f"constraint AssignmentMatrix[{c}, {startVM+i+1}] = 0;\n"
+                )
 
     return constraints, endVM
-
 
 
 def getFVConstraints(use_case: str, scaling_components: list = []):
@@ -109,7 +116,10 @@ def getFVConstraints(use_case: str, scaling_components: list = []):
 
     return constraints, start
 
-def getSymmetryBreakerConstraints(sym_breaker: str, use_case: str, scaling_components: list = []):
+
+def getSymmetryBreakerConstraints(
+    sym_breaker: str, use_case: str, scaling_components: list = []
+):
     """
     Constructs all constraints for a symmetry breaker.
 

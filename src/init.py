@@ -12,6 +12,7 @@ The script provides functions used in all other scripts.
 For more information regarding the functions, read their documentation.
 """
 
+
 def parse_config(config_path: str = "Config/config.json"):
     """
     This function opens the configuration files and extracts all the necessary settings
@@ -30,7 +31,7 @@ def parse_config(config_path: str = "Config/config.json"):
     test_settings = {}
     solvers = []
     use_cases = []
-    
+
     solver_config = 0
     use_case_config = 0
 
@@ -88,16 +89,15 @@ def parse_config(config_path: str = "Config/config.json"):
                     sat_settings["surrogate_output_ext"] = item["Output-Extension"]
                     sat_settings["surrogate_path"] = item["Model-Path"]
                     sat_settings["surrogate_ext"] = item["Model-Extension"]
-                    sat_settings["build_surrogate"] = item['Enabled']
+                    sat_settings["build_surrogate"] = item["Enabled"]
 
                 elif item["Type"] == "JSON":
                     smt_settings["surrogate_output_path"] = item["Output-Path"]
                     smt_settings["surrogate_output_ext"] = item["Output-Extension"]
                     smt_settings["surrogate_path"] = item["Model-Path"]
                     smt_settings["surrogate_ext"] = item["Model-Extension"]
-                    smt_settings["build_surrogate"] = item['Enabled']
+                    smt_settings["build_surrogate"] = item["Enabled"]
 
-                
                 else:
                     log("INIT", "ERROR", "Invalid surrogate configuration.")
                     exit(3)
@@ -106,7 +106,7 @@ def parse_config(config_path: str = "Config/config.json"):
             # Loading testing details
             #
             item = data["Test-Config"]
-            
+
             test_settings["runs"] = item["Repetitions"]
             test_settings["output_path"] = item["Output-Path"]
 
@@ -146,7 +146,7 @@ def parse_config(config_path: str = "Config/config.json"):
         except KeyError:
             log("INIT", "ERROR", "Unknown key in solver configuration")
             exit(1)
-    
+
     with open(use_case_config, "r") as file:
         try:
             data = load(file)
@@ -162,7 +162,7 @@ def parse_config(config_path: str = "Config/config.json"):
                     if item["Scaling-Components"] == True:
                         for component in item["Components"]:
                             temp["components"].append(component)
-                    
+
                     if item["Surrogate-Problem"] == True:
                         temp["surrogate"] = item["Surrogate-Model-Name"]
 
@@ -175,6 +175,7 @@ def parse_config(config_path: str = "Config/config.json"):
     settings["Solvers"] = solvers
     settings["Use-Cases"] = use_cases
 
+
 def log(phase: str, severity: str, message: str):
     """
     Prints logs to console output
@@ -185,6 +186,7 @@ def log(phase: str, severity: str, message: str):
         message (str): The message
     """
     print("[", phase, "]\t\t[", severity, "] > ", message)
+
 
 def create_directory(directory_name):
     """

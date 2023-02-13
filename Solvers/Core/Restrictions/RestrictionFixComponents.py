@@ -1,9 +1,9 @@
-
 class RestrictionFixComponentOnVM:
     """
     Restriction that fixes a component on a VM
     """
-    def __init__(self, comp_id, vm_id,  problem, value = 1):
+
+    def __init__(self, comp_id, vm_id, problem, value=1):
         self.comp_id = comp_id
         self.vm_id = vm_id
         self.value = value
@@ -15,10 +15,12 @@ class RestrictionFixComponentOnVM:
 
     def __repr__(self):
         return "RestrictionFixComponentOnVM: Component with ID {} is deployed on VM with ID {}".format(
-            self.comp_id, self.vm_id)
+            self.comp_id, self.vm_id
+        )
 
     def eval(self, solutionMatrix):
         return 1
+
 
 class RestrictionPriceOrder:
     """
@@ -36,7 +38,8 @@ class RestrictionPriceOrder:
 
     def __repr__(self):
         return "RestrictionPriceOrder: start VM ID {} - end VM ID {}".format(
-            self.start_vm_id, self.end_vm_id)
+            self.start_vm_id, self.end_vm_id
+        )
 
     def eval(self, solutionMatrix):
         return 1

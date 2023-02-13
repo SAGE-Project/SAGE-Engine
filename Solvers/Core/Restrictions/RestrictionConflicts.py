@@ -1,12 +1,17 @@
 import numpy
 
+
 class RestrictionAlphaOrBeta:
     def __init__(self, alphaCompId, betaCompId, problem):
         self.alphaCompId = alphaCompId - 1
         self.betaCompId = betaCompId - 1
 
-        problem.componentsList[self.alphaCompId].orComponentsList.append(self.betaCompId)
-        problem.componentsList[self.betaCompId].orComponentsList.append(self.alphaCompId)
+        problem.componentsList[self.alphaCompId].orComponentsList.append(
+            self.betaCompId
+        )
+        problem.componentsList[self.betaCompId].orComponentsList.append(
+            self.alphaCompId
+        )
         problem.logger.info(self)
 
     def generateRestrictions(self, solver):
@@ -14,7 +19,8 @@ class RestrictionAlphaOrBeta:
 
     def __repr__(self):
         return "RestrictionAlphaOrBeta: Component with id {} or component with id {} id deployed".format(
-            self.alphaCompId, self.betaCompId)
+            self.alphaCompId, self.betaCompId
+        )
 
     def eval(self, solutionMatrix):
         """
@@ -22,7 +28,9 @@ class RestrictionAlphaOrBeta:
         :param solutionMatrix:
         :return:
         """
-        if (numpy.sum(solutionMatrix[self.alphaCompId]) > 0) + (numpy.sum(solutionMatrix[self.betaCompId]) > 0) == 1:
+        if (numpy.sum(solutionMatrix[self.alphaCompId]) > 0) + (
+            numpy.sum(solutionMatrix[self.betaCompId]) > 0
+        ) == 1:
             return 0
         return 1
 
@@ -43,8 +51,9 @@ class RestrictionConflict:
         solver.RestrictionConflict(self.compId, self.conflictCompsIdList)
 
     def __repr__(self):
-        return "RestrictionConflict: component with id {} in conflict with components with id {}"\
-            .format(self.compId, self.conflictCompsIdList)
+        return "RestrictionConflict: component with id {} in conflict with components with id {}".format(
+            self.compId, self.conflictCompsIdList
+        )
 
     def eval(self, solutionMatrix):
         """
@@ -56,6 +65,9 @@ class RestrictionConflict:
         viotatedRestrictions = 0
         for conflictCompId in self.conflictCompsIdList:
             for j in range(vms):
-                if solutionMatrix[self.compId][j] == 1 and solutionMatrix[conflictCompId][j] == 1:
+                if (
+                    solutionMatrix[self.compId][j] == 1
+                    and solutionMatrix[conflictCompId][j] == 1
+                ):
                     viotatedRestrictions += 1
         return viotatedRestrictions
