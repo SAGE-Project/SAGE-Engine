@@ -1,0 +1,26 @@
+{
+  "application" : "WordPress3",
+  "comment-general": "From the Zephyrus-ASE paper: at least 3 replicas of Wordpress or at least 7 DNS (we can not capture OR in the UI, we have here the 3 Wordpress replicas); Answer: minimum 4VMs",
+  "components" :[
+    {"id": 1, "name" : "WordPress",
+      "Compute": {"CPU":2, "GPU":"false", "Memory": 512},
+      "Storage": {"StorageType": "HDD", "StorageSize": 1000},
+      "Network": {},
+      "keywords": [],
+      "operatingSystem": "Linux",
+      "preferences": {}
+    },
+    {"id": 2, "name" : "MySQL",
+      "Compute": {"CPU":2, "GPU":"false", "Memory": 512},
+      "Storage": {"StorageType": "HDD", "StorageSize": 2000},
+      "Network": {},
+      "keywords": [],
+      "operatingSystem": "Linux",
+      "preferences": {}
+  
+    }
+  ],
+  "IP" : {"publicIPs": 1, "IPType": "IP4"},
+  "comment-restrictions": "RequireProvideDependency to be read as: for 1 instance of component with id 2 there must be at least ",
+  "restrictions" : []
+  }
