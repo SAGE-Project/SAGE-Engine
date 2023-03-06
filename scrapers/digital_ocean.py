@@ -22,7 +22,7 @@ def parse_offers(offers):
         output[name] = {
             "cpu": int(name.replace("vcpu", "").split("-")[1]),
             "memory": int(name.replace("gb", "").replace("GiB", "").split("-")[2]) * 1000,
-            "storage": 1000,
+            "storage": 1000 * 1000,
             "operatingSystem": "Linux",
             "price": 100 * i
         }
