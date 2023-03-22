@@ -16,7 +16,7 @@
             },
             "Network": {},
             "keywords": [],
-            "operatingSystem": "Linux",
+            "operatingSystem": "ngnix",
             "preferences": {}
         },
         {
@@ -33,7 +33,7 @@
             },
             "Network": {},
             "keywords": [],
-            "operatingSystem": "Linux",
+            "operatingSystem": "ngnix",
             "preferences": {}
         },
         {
@@ -51,7 +51,7 @@
             },
             "Network": {},
             "keywords": [],
-            "operatingSystem": "Linux",
+            "operatingSystem": "ngnix",
             "preferences": {}
         },
         {
@@ -68,7 +68,7 @@
             },
             "Network": {},
             "keywords": [],
-            "operatingSystem": "Linux",
+            "operatingSystem": "ngnix",
             "preferences": {}
         },
         {
@@ -85,7 +85,7 @@
             },
             "Network": {},
             "keywords": [],
-            "operatingSystem": "Linux",
+            "operatingSystem": "ngnix",
             "preferences": {}
         }
     ],
@@ -180,7 +180,7 @@
     "output": {
         "min_price": 5300,
         "type_of_sym_br": "FVPR",
-        "time (secs)": 0.2405712604522705,
+        "time (secs)": 0.24921917915344238,
         "types_of_VMs": [
             4,
             4,
@@ -207,7 +207,7 @@
                     "cpu": 2,
                     "memory": 2000,
                     "storage": 1000000,
-                    "operatingSystem": "Linux",
+                    "operatingSystem": "ngnix",
                     "price": 400,
                     "id": 4
                 }
@@ -217,7 +217,7 @@
                     "cpu": 4,
                     "memory": 8000,
                     "storage": 1000000,
-                    "operatingSystem": "Linux",
+                    "operatingSystem": "ngnix",
                     "price": 1100,
                     "id": 11
                 }

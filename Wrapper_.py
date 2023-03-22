@@ -60,7 +60,7 @@ class Wrapper_:
 
 wrapper = Wrapper_()
 
-with open("Models/json/Wordpress.json", "r") as file:
+with open("Models/json/test.json", "r") as file:
     application = json.load(file)
 
 with open("Data/json/digital_ocean_offers.json", "r") as file:
