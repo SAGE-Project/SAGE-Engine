@@ -56,11 +56,12 @@ def parse_offers(offers):
         name = offer["name"]
         if extra_info.get(name):
             output[name] = {
-                "cpu": round(int(name.replace("vcpu", "").split("-")[1]) * 0.8 * 1000 ), # in ms
-                "memory": round(int(name.replace("gb", "").replace("GiB", "").split("-")[2]) * 1000 * 0.9 - 450), # in Mb
-                "storage": round(extra_info[name]["storage"] * 0.9 - 3 * 1000), # in Mb
+                "cpu": round(int(name.replace("vcpu", "").split("-")[1]) * 0.9 * 1000),  # in ms
+                # in Mb
+                "memory": round(int(name.replace("gb", "").replace("GiB", "").split("-")[2]) * 1000 * 0.9 - 450),
+                "storage": round(extra_info[name]["storage"] * 0.9 - 3 * 1000),
                 "operatingSystem": "Linux",
-                "price": extra_info[name]["price"] * 10
+                "price": extra_info[name]["price"] * 10  # 8,2 $ -> 82
             }
 
     return output
