@@ -103,10 +103,10 @@ class Wrapper_:
 
 wrapper = Wrapper_()
 
-with open("Models/json/SecureWeb_with_milli_cpu.json", "r") as file:
+with open("Models/json/WordPress8_with_milli_cpu.json", "r") as file:
     application = json.load(file)
 
-with open("Data/json/digital_ocean_offers.json", "r") as file:
+with open("Data/json/offers_digital_ocean.json", "r") as file:
     offers_20 = json.load(file)
 
 result = wrapper.solve(application, offers_20, inst=3)

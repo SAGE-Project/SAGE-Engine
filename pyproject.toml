@@ -13,6 +13,7 @@ ortools = "^9.5.2237"
 networkx = "^3.0"
 minizinc = "^0.8.0"
 numpy = "1.24.0"
+kubernetes = "^26.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.1.0"

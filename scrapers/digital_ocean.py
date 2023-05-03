@@ -61,7 +61,7 @@ def parse_offers(offers):
                 "memory": round(int(name.replace("gb", "").replace("GiB", "").split("-")[2]) * 1000 * 0.9 - 450),
                 "storage": round(extra_info[name]["storage"] * 0.9 - 3 * 1000),
                 "operatingSystem": "Linux",
-                "price": extra_info[name]["price"] * 10  # 8,2 $ -> 82
+                "price": extra_info[name]["price"] * 10  # 8,2 $ -> 82 10000
             }
 
     return output

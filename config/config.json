@@ -1,54 +1,45 @@
-{   
+{
     "Source-Config": [
         {
             "Type": "MiniZinc",
-
             "Path": "Models/MiniZinc",
             "Extension": "mzn",
-            
             "Formalization": 1
         },
         {
             "Type": "JSON",
-            
             "Path": "Models/json",
             "Extension": "json",
-            
             "Formalization": 1
         }
     ],
-
     "Input-Config": [
         {
             "Type": "MiniZinc",
-
             "Path": "Data/MiniZinc",
             "Extension": "dzn",
-
             "Offer-Numbers": [
-                20, 40, 250, 500
+                20,
+                40,
+                250,
+                500
             ]
         },
         {
             "Type": "JSON",
-
             "Path": "Data/json",
             "Extension": "json",
-
             "Offer-Numbers": [
-                20, 40, 250, 500
+                "digital_ocean"
             ]
         }
     ],
-
     "Surrogate-Config": [
         {
             "Type": "MiniZinc",
-        
             "Model-Path": "Models/Surrogate/MiniZinc",
             "Model-Extension": "mzn",
             "Enabled": false,
-
             "Output-Path": "Data/",
             "Output-Extension": "csv"
         },
@@ -56,27 +47,18 @@
             "Model-Path": "Models/Surrogate/json",
             "Model-Extension": "json",
             "Type": "JSON",
-
             "Enabled": true,
-
             "Output-Path": "Data",
             "Output-Extension": "csv"
         }
     ],
-
     "Test-Config": {
         "Repetitions": 3,
-
-        "Symmetry-Breaking": false,
+        "Symmetry-Breaking": true,
         "Symmetry-Breaker-List": [
-            "FV", "PR", "L", "LX",
-            "FVPR", "FVL", "FVLX", "PRL", "PRLX", "LPR", "LLX",
-            "FVPRL", "FVPRLX", "FVLPR", "FVLLX", "PRLLX", "LPRLX",
-            "FVPRLLX", "FVLPRLX"
+            "FVPR"
         ],
-
         "Output-Path": "Output",
-        
         "Solver-Config-File": "Config/solvers.json",
         "Use-Case-Config-File": "Config/useCases.json",
         "MiniZinc-SB-File": "Config/symmetryBreaking.json"
