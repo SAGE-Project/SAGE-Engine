@@ -51,7 +51,7 @@
   "IP" : {"publicIPs": 1, "IPType": "IP4"},
   "comment-restrictions": "Number 3 from LowerBound below is LoR=LevelOfRedundancy; FullDeployment: compsIdList: the list of components that component alpha is in conflict with",
   "restrictions" : [
-    {"type":"Conflicts", "alphaCompId":1, "compsIdList":[2, 3, 4, 5]},
+   {"type":"Conflicts", "alphaCompId":1, "compsIdList":[2, 3, 4, 5]},
     {"type":"Conflicts", "alphaCompId":2, "compsIdList":[3]},
     {"type":"EqualBound",  "compsIdList":[1], "bound": 1},
     {"type":"LowerBound",  "compsIdList":[2, 3], "bound": 3},

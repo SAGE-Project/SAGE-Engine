@@ -1,5 +1,5 @@
 {
-  "application" : "WordPress3",
+  "application" : "WordPress8",
   "comment-general": "From the Zephyrus-ASE paper: at least 3 replicas of Wordpress or at least 7 DNS (we can not capture OR in the UI, we have here the 3 Wordpress replicas); Answer: minimum 4VMs",
   "components" :[
     {"id": 1, "name" : "WordPress",
@@ -53,6 +53,10 @@
                     {"type":"RequireProvideDependency", "alphaCompId":1, "betaCompId":3,
                       "alphaCompIdInstances":1, "betaCompIdInstances":7},
                     {"type":"UpperBound",  "compsIdList":[3], "bound": 1},
+                    {"type":"RequireProvideDependency", "alphaCompId":1, "betaCompId":4,
+                      "alphaCompIdInstances":1, "betaCompIdInstances":3},
+                    {"type":"RequireProvideDependency", "alphaCompId":1, "betaCompId":2,
+                      "alphaCompIdInstances":2, "betaCompIdInstances":3},
                     {"type":"AlternativeComponents", "alphaCompId":3, "betaCompId":4},
                     {"type":"Conflicts", "alphaCompId":3, "compsIdList":[1, 2, 5]},
                     {"type":"Conflicts", "alphaCompId":4, "compsIdList":[1, 2, 5]},

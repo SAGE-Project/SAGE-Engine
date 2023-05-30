@@ -3,7 +3,7 @@ import subprocess
 
 import requests
 
-API_KEY = "dop_v1_251795dbbc2ff4cff763e86efcedd9a5b2800f21c521446edd6e248118b52ee1"
+API_KEY = "dop_v1_86c612a7aee3e08d392482f8c204531dfd6b14d74d5476f639d30bba64841952"
 STATIC_DIR = "./scrapers/static"
 OFFERS_DIR = "./Data/json"
 PRICES = [
@@ -55,14 +55,17 @@ def parse_offers(offers):
     for offer in offers:
         name = offer["name"]
         if extra_info.get(name):
-            output[name] = {
-                "cpu": round(int(name.replace("vcpu", "").split("-")[1]) * 0.9 * 1000),  # in ms
-                # in Mb
-                "memory": round(int(name.replace("gb", "").replace("GiB", "").split("-")[2]) * 1000 * 0.9 - 450),
-                "storage": round(extra_info[name]["storage"] * 0.9 - 3 * 1000),
-                "operatingSystem": "Linux",
-                "price": extra_info[name]["price"] * 10  # 8,2 $ -> 82 10000
-            }
+            try:
+                output[name] = {
+                    "cpu": round(int(name.replace("vcpu", "").split("-")[1]) * 0.95 * 1000 - 650),  # in ms
+                    # in Mb
+                    "memory": round(int(name.replace("gb", "").replace("GiB", "").split("-")[2]) * 0.95 * 1000 - 750),
+                    "storage": round(extra_info[name]["storage"] * 0.9 - 3 * 1000),
+                    "operatingSystem": "Linux",
+                    "price": extra_info[name]["price"] * 10  # 8,2 $ -> 82 10000
+                }
+            except:
+                pass
 
     return output
 
