@@ -5,9 +5,9 @@ import src.smt
 
 
 class Wrapper_:
+    @staticmethod
     def solve(
-        self,
-        application_model_json,
+            application_model_json,
         offers_json,
         symmetry_breaker="FVPR",
         inst=0,
@@ -31,8 +31,8 @@ class Wrapper_:
         )
 
         SMTsolver.init_problem(problem, "optimize", sb_option=symmetry_breaker)
-        print(SMTsolver.a)
-        print(SMTsolver.vmType)
+        # print(SMTsolver.a)
+        # print(SMTsolver.vmType)
 
         # SMTsolver.solver.add_soft(SMTsolver.a[0] == 1)
         # SMTsolver.solver.add_soft(SMTsolver.a[1] == 0)
@@ -78,13 +78,13 @@ class Wrapper_:
 
         price, distr, runtime, a_mat, vms_type = SMTsolver.run()
 
-        print(a_mat)
-        print(vms_type)
-        print(price)
+        # print(a_mat)
+        # print(vms_type)
+        # print(price)
         if not runtime or runtime > 2400:
             log("TESTING", "WARN", "Test aborted. Timeout")
         else:
-            print(runtime)
+            # print(runtime)
             vm_specs = []
             for index, (key, value) in enumerate(offers_json.items()):
                 if (index + 1) in vms_type:
@@ -106,18 +106,3 @@ class Wrapper_:
             }
             application_model_json.update(output)
             return application_model_json
-
-
-wrapper = Wrapper_()
-
-with open("Models/json/Wordpress.json", "r") as file:
-    application = json.load(file)
-
-with open("Data/json/offers_20.json", "r") as file:
-    offers_20 = json.load(file)
-
-
-wrapper = Wrapper_()
-
-result = wrapper.solve(application, offers_20)
-print(result)

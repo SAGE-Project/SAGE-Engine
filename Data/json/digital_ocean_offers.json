@@ -1,394 +1,191 @@
 {
   "s-1vcpu-2gb": {
-    "cpu": 300,
-    "memory": 1150,
+    "cpu": 800,
+    "memory": 1350,
     "storage": 42000,
     "operatingSystem": "Linux",
     "price": 120
   },
   "s-1vcpu-2gb-amd": {
-    "cpu": 300,
-    "memory": 1150,
+    "cpu": 800,
+    "memory": 1350,
     "storage": 42000,
     "operatingSystem": "Linux",
     "price": 140
   },
   "s-1vcpu-2gb-intel": {
-    "cpu": 300,
-    "memory": 1150,
+    "cpu": 800,
+    "memory": 1350,
     "storage": 42000,
     "operatingSystem": "Linux",
     "price": 140
   },
   "s-2vcpu-2gb": {
-    "cpu": 1250,
-    "memory": 1150,
+    "cpu": 1600,
+    "memory": 1350,
     "storage": 51000,
     "operatingSystem": "Linux",
     "price": 180
   },
   "s-2vcpu-2gb-amd": {
-    "cpu": 1250,
-    "memory": 1150,
+    "cpu": 1600,
+    "memory": 1350,
     "storage": 51000,
     "operatingSystem": "Linux",
     "price": 210
   },
   "s-2vcpu-2gb-intel": {
-    "cpu": 1250,
-    "memory": 1150,
+    "cpu": 1600,
+    "memory": 1350,
     "storage": 51000,
     "operatingSystem": "Linux",
     "price": 210
   },
   "s-2vcpu-4gb": {
-    "cpu": 1250,
-    "memory": 3050,
+    "cpu": 1600,
+    "memory": 3150,
     "storage": 69000,
     "operatingSystem": "Linux",
     "price": 240
   },
   "s-2vcpu-4gb-amd": {
-    "cpu": 1250,
-    "memory": 3050,
+    "cpu": 1600,
+    "memory": 3150,
     "storage": 69000,
     "operatingSystem": "Linux",
     "price": 280
   },
   "s-2vcpu-4gb-intel": {
-    "cpu": 1250,
-    "memory": 3050,
+    "cpu": 1600,
+    "memory": 3150,
     "storage": 69000,
     "operatingSystem": "Linux",
     "price": 280
   },
   "s-4vcpu-8gb": {
-    "cpu": 3150,
-    "memory": 6850,
+    "cpu": 3200,
+    "memory": 6750,
     "storage": 141000,
     "operatingSystem": "Linux",
     "price": 480
   },
   "s-4vcpu-8gb-amd": {
-    "cpu": 3150,
-    "memory": 6850,
+    "cpu": 3200,
+    "memory": 6750,
     "storage": 141000,
     "operatingSystem": "Linux",
     "price": 560
   },
   "s-4vcpu-8gb-intel": {
-    "cpu": 3150,
-    "memory": 6850,
+    "cpu": 3200,
+    "memory": 6750,
     "storage": 141000,
     "operatingSystem": "Linux",
     "price": 560
   },
   "g-2vcpu-8gb": {
-    "cpu": 1250,
-    "memory": 6850,
+    "cpu": 1600,
+    "memory": 6750,
     "storage": 19500,
     "operatingSystem": "Linux",
     "price": 630
   },
   "gd-2vcpu-8gb": {
-    "cpu": 1250,
-    "memory": 6850,
+    "cpu": 1600,
+    "memory": 6750,
     "storage": 42000,
     "operatingSystem": "Linux",
     "price": 680
   },
   "m-2vcpu-16gb": {
-    "cpu": 1250,
-    "memory": 14450,
+    "cpu": 1600,
+    "memory": 13950,
     "storage": 42000,
     "operatingSystem": "Linux",
     "price": 840
   },
   "s-8vcpu-16gb": {
-    "cpu": 6950,
-    "memory": 14450,
+    "cpu": 6400,
+    "memory": 13950,
     "storage": 285000,
     "operatingSystem": "Linux",
     "price": 960
   },
   "m3-2vcpu-16gb": {
-    "cpu": 1250,
-    "memory": 14450,
+    "cpu": 1600,
+    "memory": 13950,
     "storage": 132000,
     "operatingSystem": "Linux",
     "price": 1040
   },
   "s-8vcpu-16gb-amd": {
-    "cpu": 6950,
-    "memory": 14450,
+    "cpu": 6400,
+    "memory": 13950,
     "storage": 285000,
     "operatingSystem": "Linux",
     "price": 1120
   },
   "s-8vcpu-16gb-intel": {
-    "cpu": 6950,
-    "memory": 14450,
+    "cpu": 6400,
+    "memory": 13950,
     "storage": 285000,
     "operatingSystem": "Linux",
     "price": 1120
   },
-  "c2-4vcpu-8gb-intel": {
-    "cpu": 3150,
-    "memory": 6850,
-    "storage": 87000,
-    "operatingSystem": "Linux",
-    "price": 1220
-  },
   "g-4vcpu-16gb": {
-    "cpu": 3150,
-    "memory": 14450,
+    "cpu": 3200,
+    "memory": 13950,
     "storage": 42000,
     "operatingSystem": "Linux",
     "price": 1260
   },
   "m6-2vcpu-16gb": {
-    "cpu": 1250,
-    "memory": 14450,
+    "cpu": 1600,
+    "memory": 13950,
     "storage": 267000,
     "operatingSystem": "Linux",
     "price": 1310
   },
   "gd-4vcpu-16gb": {
-    "cpu": 3150,
-    "memory": 14450,
+    "cpu": 3200,
+    "memory": 13950,
     "storage": 87000,
     "operatingSystem": "Linux",
     "price": 1360
   },
   "so1_5-2vcpu-16gb": {
-    "cpu": 1250,
-    "memory": 14450,
+    "cpu": 1600,
+    "memory": 13950,
     "storage": 402000,
     "operatingSystem": "Linux",
     "price": 1630
   },
   "m-4vcpu-32gb": {
-    "cpu": 3150,
-    "memory": 29650,
+    "cpu": 3200,
+    "memory": 28350,
     "storage": 87000,
     "operatingSystem": "Linux",
     "price": 1680
   },
   "m3-4vcpu-32gb": {
-    "cpu": 3150,
-    "memory": 29650,
+    "cpu": 3200,
+    "memory": 28350,
     "storage": 267000,
     "operatingSystem": "Linux",
     "price": 2080
   },
-  "c2-8vcpu-16gb-intel": {
-    "cpu": 6950,
-    "memory": 14450,
-    "storage": 177000,
-    "operatingSystem": "Linux",
-    "price": 2440
-  },
-  "g-8vcpu-32gb": {
-    "cpu": 6950,
-    "memory": 29650,
-    "storage": 87000,
-    "operatingSystem": "Linux",
-    "price": 2520
-  },
   "m6-4vcpu-32gb": {
-    "cpu": 3150,
-    "memory": 29650,
+    "cpu": 3200,
+    "memory": 28350,
     "storage": 537000,
     "operatingSystem": "Linux",
     "price": 2620
   },
-  "gd-8vcpu-32gb": {
-    "cpu": 6950,
-    "memory": 29650,
-    "storage": 177000,
-    "operatingSystem": "Linux",
-    "price": 2720
-  },
   "so1_5-4vcpu-32gb": {
-    "cpu": 3150,
-    "memory": 29650,
+    "cpu": 3200,
+    "memory": 28350,
     "storage": 807000,
     "operatingSystem": "Linux",
     "price": 3260
-  },
-  "m-8vcpu-64gb": {
-    "cpu": 6950,
-    "memory": 60050,
-    "storage": 177000,
-    "operatingSystem": "Linux",
-    "price": 3360
-  },
-  "m3-8vcpu-64gb": {
-    "cpu": 6950,
-    "memory": 60050,
-    "storage": 537000,
-    "operatingSystem": "Linux",
-    "price": 4160
-  },
-  "c2-16vcpu-32gb-intel": {
-    "cpu": 14550,
-    "memory": 29650,
-    "storage": 357000,
-    "operatingSystem": "Linux",
-    "price": 4890
-  },
-  "g-16vcpu-64gb": {
-    "cpu": 14550,
-    "memory": 60050,
-    "storage": 177000,
-    "operatingSystem": "Linux",
-    "price": 5040
-  },
-  "m6-8vcpu-64gb": {
-    "cpu": 6950,
-    "memory": 60050,
-    "storage": 1077000,
-    "operatingSystem": "Linux",
-    "price": 5240
-  },
-  "gd-16vcpu-64gb": {
-    "cpu": 14550,
-    "memory": 60050,
-    "storage": 357000,
-    "operatingSystem": "Linux",
-    "price": 5440
-  },
-  "so1_5-8vcpu-64gb": {
-    "cpu": 6950,
-    "memory": 60050,
-    "storage": 1617000,
-    "operatingSystem": "Linux",
-    "price": 6520
-  },
-  "m-16vcpu-128gb": {
-    "cpu": 14550,
-    "memory": 120850,
-    "storage": 357000,
-    "operatingSystem": "Linux",
-    "price": 6720
-  },
-  "m3-16vcpu-128gb": {
-    "cpu": 14550,
-    "memory": 120850,
-    "storage": 1077000,
-    "operatingSystem": "Linux",
-    "price": 8320
-  },
-  "c2-32vcpu-64gb-intel": {
-    "cpu": 29750,
-    "memory": 60050,
-    "storage": 717000,
-    "operatingSystem": "Linux",
-    "price": 9780
-  },
-  "m-24vcpu-192gb": {
-    "cpu": 22150,
-    "memory": 181650,
-    "storage": 537000,
-    "operatingSystem": "Linux",
-    "price": 10080
-  },
-  "g-32vcpu-128gb": {
-    "cpu": 29750,
-    "memory": 120850,
-    "storage": 357000,
-    "operatingSystem": "Linux",
-    "price": 10080
-  },
-  "m6-16vcpu-128gb": {
-    "cpu": 14550,
-    "memory": 120850,
-    "storage": 2157000,
-    "operatingSystem": "Linux",
-    "price": 10480
-  },
-  "gd-32vcpu-128gb": {
-    "cpu": 29750,
-    "memory": 120850,
-    "storage": 717000,
-    "operatingSystem": "Linux",
-    "price": 10880
-  },
-  "m3-24vcpu-192gb": {
-    "cpu": 22150,
-    "memory": 181650,
-    "storage": 1617000,
-    "operatingSystem": "Linux",
-    "price": 12480
-  },
-  "g-40vcpu-160gb": {
-    "cpu": 37350,
-    "memory": 151250,
-    "storage": 447000,
-    "operatingSystem": "Linux",
-    "price": 12600
-  },
-  "so1_5-16vcpu-128gb": {
-    "cpu": 14550,
-    "memory": 120850,
-    "storage": 3237000,
-    "operatingSystem": "Linux",
-    "price": 13040
-  },
-  "m-32vcpu-256gb": {
-    "cpu": 29750,
-    "memory": 242450,
-    "storage": 717000,
-    "operatingSystem": "Linux",
-    "price": 13440
-  },
-  "gd-40vcpu-160gb": {
-    "cpu": 37350,
-    "memory": 151250,
-    "storage": 897000,
-    "operatingSystem": "Linux",
-    "price": 13600
-  },
-  "c2-48vcpu-96gb-intel": {
-    "cpu": 44950,
-    "memory": 90450,
-    "storage": 1077000,
-    "operatingSystem": "Linux",
-    "price": 14660
-  },
-  "m6-24vcpu-192gb": {
-    "cpu": 22150,
-    "memory": 181650,
-    "storage": 3237000,
-    "operatingSystem": "Linux",
-    "price": 15720
-  },
-  "m3-32vcpu-256gb": {
-    "cpu": 29750,
-    "memory": 242450,
-    "storage": 2157000,
-    "operatingSystem": "Linux",
-    "price": 16640
-  },
-  "so1_5-24vcpu-192gb": {
-    "cpu": 22150,
-    "memory": 181650,
-    "storage": 4857000,
-    "operatingSystem": "Linux",
-    "price": 19560
-  },
-  "m6-32vcpu-256gb": {
-    "cpu": 29750,
-    "memory": 242450,
-    "storage": 4317000,
-    "operatingSystem": "Linux",
-    "price": 20960
-  },
-  "so1_5-32vcpu-256gb": {
-    "cpu": 29750,
-    "memory": 242450,
-    "storage": 6477000,
-    "operatingSystem": "Linux",
-    "price": 26080
   }
 }
