@@ -1,6 +1,7 @@
+import json
 import dgl
 import torch
-from Wrapper_ import Wrapper_
+from Wrapper_Z3 import Wrapper_Z3
 from gnn.dgl_graph import DGLGraph
 from gnn.main import get_graph_data, to_assignment_matrix, count_matches_and_diffs
 
@@ -14,7 +15,7 @@ class Wrapper_GNN:
 
     def solve(self, application_model_json, offers_json):
         # Obtain data in required form (ignore solution)
-        app_json = Wrapper_.solve(application_model_json, offers_json)
+        app_json = Wrapper_Z3().solve(application_model_json, offers_json)
         # Transform into graph data structure
         graph = get_graph_data(app_json, app_json["application"])
         # Transform into required DGL graph structure
@@ -37,11 +38,12 @@ class Wrapper_GNN:
         pred = logits.argmax(dim=-1)
         y_pred.append(pred)
         assignment_pred = to_assignment_matrix(dgl_graph, dec_graph, pred, 5)
-        assignment_actual = to_assignment_matrix(dgl_graph, dec_graph, edge_label, 5)
-        matches, diffs = count_matches_and_diffs([element for row in assignment_pred for element in row],
-                                                 [element for row in assignment_actual for element in row])
-        print(f"{matches} values match; {diffs} don't")
-        print(f"Prediction {assignment_pred}")
-        print(f"Actual {assignment_actual}")
+        return assignment_pred
+        # assignment_actual = to_assignment_matrix(dgl_graph, dec_graph, edge_label, 5)
+        # matches, diffs = count_matches_and_diffs([element for row in assignment_pred for element in row],
+        #                                          [element for row in assignment_actual for element in row])
+        # print(f"{matches} values match; {diffs} don't")
+        # print(f"Prediction {assignment_pred}")
+        # print(f"Actual {assignment_actual}")
 
 

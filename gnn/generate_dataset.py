@@ -1,9 +1,9 @@
 import itertools
 import json
-from Wrapper_ import Wrapper_
+from Wrapper_Z3 import Wrapper_Z3
 
 
-with open("../Models/json/SecureBilling_with_milli_cpu.json", "r") as file:
+with open("../Models/json/SecureWeb_with_milli_cpu.json", "r") as file:
     application = json.load(file)
 
 with open("../Data/json/digital_ocean_offers.json", "r") as file:
@@ -30,8 +30,8 @@ print(application)
 
 results = 0
 for offer in offers_comb:
-    wrapper = Wrapper_()
-    with open("../Models/json/SecureBilling_with_milli_cpu.json", "r") as file:
+    wrapper = Wrapper_Z3()
+    with open("../Models/json/SecureWeb_with_milli_cpu.json", "r") as file:
         application = json.load(file)
     result = wrapper.solve(application, offer)
     if result:
