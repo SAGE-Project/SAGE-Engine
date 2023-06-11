@@ -1,7 +1,7 @@
 {
     "Use-Cases": [
         {
-            "Name": "WordPress", 
+            "Name": "WordPress3_with_milli_cpu",
             "Enabled": true,
 
             "Model-Name": "Wordpress", 
@@ -9,7 +9,7 @@
             "Components": [
                 {
                     "Name": "WPInstances",
-                    "Lower-Bound": 3,
+                    "Lower-Bound": 8,
                     "Upper-Bound": 12
                 }
             ],
@@ -19,7 +19,7 @@
         }, 
         {
             "Name": "Oryx2 Application", 
-            "Enabled": true,
+            "Enabled": false,
             
             "Model-Name": "Oryx2", 
             "Scaling-Components": false, 
@@ -29,7 +29,7 @@
         }, 
         {
             "Name": "Secure Web Container", 
-            "Enabled": true,
+            "Enabled": false,
             
             "Model-Name": "SecureWeb", 
             "Scaling-Components": false, 
@@ -39,7 +39,7 @@
         }, 
         {
             "Name": "Secure Billing Email Service", 
-            "Enabled": true,
+            "Enabled": false,
             
             "Model-Name": "SecureBilling", 
             "Scaling-Components": false, 
