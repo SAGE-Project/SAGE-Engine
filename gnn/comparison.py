@@ -15,4 +15,4 @@ with open("../Data/json/digital_ocean_offers.json", "r") as file:
 # wrapper_gnn.solve(application, dict(random.sample(list(offers_do.items()), 19)))
 
 wrapper_gnn_z3 = Wrapper_GNN_Z3()
-print(wrapper_gnn_z3.solve(application, offers_do, use_gnn=True))
+print(wrapper_gnn_z3.solve(application, offers_do, mode="sim"))

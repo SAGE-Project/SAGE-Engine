@@ -17,6 +17,14 @@ def add_pred_soft_constraints(solver, prediction):
                 solver.solver.add_soft(solver.vmType[vm_idx] == placement)
 
 
+def add_pred_soft_constraints_sim(solver, prediction):
+    for idx, vm_type in enumerate(prediction["output"]["types_of_VMs"]):
+        solver.solver.add_soft(solver.vmType[idx] == vm_type)
+    a_matrix_flatten = [item for sublist in prediction["output"]["assign_matr"] for item in sublist]
+    for idx, val in enumerate(a_matrix_flatten):
+        solver.solver.add_soft(solver.a[idx] == val)
+
+
 class Wrapper_Z3:
     def __init__(self, symmetry_breaker="FVPR", solver_id="z3"):
         self.symmetry_breaker = symmetry_breaker
@@ -27,6 +35,7 @@ class Wrapper_Z3:
             application_model_json,
             offers_json,
             prediction=None,
+            prediction_sim=None,
             inst=0
     ):
         SMTsolver = src.smt.getSolver(self.solver_id)
@@ -48,6 +57,8 @@ class Wrapper_Z3:
         SMTsolver.init_problem(problem, "optimize", sb_option=self.symmetry_breaker)
         if prediction is not None:
             add_pred_soft_constraints(SMTsolver, prediction)
+        elif prediction_sim is not None:
+            add_pred_soft_constraints_sim(SMTsolver, prediction_sim)
         price, distr, runtime, a_mat, vms_type = SMTsolver.run()
 
         if not runtime or runtime > 2400:
