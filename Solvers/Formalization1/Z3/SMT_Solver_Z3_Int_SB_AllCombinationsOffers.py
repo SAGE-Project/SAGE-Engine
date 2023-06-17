@@ -28,14 +28,19 @@ class Z3_SolverInt_SB_Enc_AllCombinationsOffers(Z3_Solver_Int_Parent, ManuverSol
 
         # elements of the association matrix should be just 0 or 1
         for i in range(len(self.a)):
-            self.solver.add(Or([self.a[i] == 0, self.a[i] == 1]))
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(Or([self.a[i] == 0, self.a[i] == 1]), pi)
 
         self.vmType = [Int("VM%iType" % j) for j in range(1, self.nrVM + 1)]
 
         for i in range(self.nrComp):
             for j in range(self.nrVM):
-                self.solver.add(
-                    Implies(self.a[i * self.nrVM + j] == 1, Not(self.vmType[j] == 0))
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
+                    Implies(self.a[i * self.nrVM + j] == 1, Not(self.vmType[j] == 0)),
+                    pi
                 )
 
     def convert_price(self, price):
@@ -44,12 +49,17 @@ class Z3_SolverInt_SB_Enc_AllCombinationsOffers(Z3_Solver_Int_Parent, ManuverSol
     def _hardware_and_offers_restrictionns(self, scale_factor):
         # price restrictions
         for j in range(self.nrVM):
-            self.solver.add(self.PriceProv[j] >= 0)
-            self.solver.add(
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(self.PriceProv[j] >= 0, pi)
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 Implies(
                     sum([self.a[i + j] for i in range(0, len(self.a), self.nrVM)]) == 0,
                     self.PriceProv[j] == 0,
-                )
+                ),
+                pi
             )
 
         # map vm to type
@@ -63,7 +73,9 @@ class Z3_SolverInt_SB_Enc_AllCombinationsOffers(Z3_Solver_Int_Parent, ManuverSol
                     if int(scale_factor) == 1
                     else offer[priceIndex] / scale_factor
                 )
-                self.solver.add(
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
                     Implies(
                         And(
                             sum(
@@ -91,13 +103,16 @@ class Z3_SolverInt_SB_Enc_AllCombinationsOffers(Z3_Solver_Int_Parent, ManuverSol
                                 else offer[3] / scale_factor
                             ),
                         ),
-                    )
+                    ),
+                    pi
                 )
             lst = [
                 self.vmType[vm_id] == offerID
                 for offerID in range(1, len(self.offers_list) + 1)
             ]
-            self.solver.add(Or(lst))
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(Or(lst), pi)
 
         # map hardware
         tmp = []
@@ -143,4 +158,8 @@ class Z3_SolverInt_SB_Enc_AllCombinationsOffers(Z3_Solver_Int_Parent, ManuverSol
                 )
                 <= self.StorageProv[k]
             )
-        self.solver.add(tmp)
+
+        for constr in tmp:
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(constr, pi)

@@ -19,6 +19,9 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
             self.labelIdx_offer = 0
             self.labelIdx_conflict = 0
 
+        self.p_constraints = []
+        self.g_constraints = []
+
         self.vmIds_for_fixedComponents = set()
         self._defineVariablesAndConstraints()
 
@@ -44,7 +47,9 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         n = len(list_comps)
         n = n - 1
         for vm_id in range(self.nrVM - 1):
-            self.solver.add(
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 sum(
                     [
                         self.a[list_comps[i] * self.nrVM + vm_id] * (2 ** (n - i))
@@ -56,7 +61,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                         self.a[list_comps[i] * self.nrVM + vm_id + 1] * (2 ** (n - i))
                         for i in range(len(list_comps))
                     ]
-                )
+                ),
+                pi
             )
 
     def RestrictionLex(self, vm_id, additional_constraints=[]):
@@ -75,11 +81,14 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                     self.a[u * self.nrVM + vm_id] == self.a[u * self.nrVM + vm_id + 1]
                 )
             # print(l)
-            self.solver.add(
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 Implies(
                     And(l),
                     self.a[i * self.nrVM + vm_id] >= self.a[i * self.nrVM + vm_id + 1],
-                )
+                ),
+                pi
             )
 
     def RestrictionPrice(self, vm_id, additional_constraints=[]):
@@ -94,18 +103,24 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
             self.solver.add(self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1])
         else:
             if len(additional_constraints) == 1:
-                self.solver.add(
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
                     Implies(
                         additional_constraints[0],
                         self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1],
-                    )
+                    ),
+                    pi
                 )
             else:
-                self.solver.add(
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
                     Implies(
                         And(additional_constraints),
                         self.PriceProv[vm_id] >= self.PriceProv[vm_id + 1],
-                    )
+                    ),
+                    pi
                 )
 
         return self.PriceProv[vm_id] == self.PriceProv[vm_id + 1]
@@ -118,7 +133,9 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         :param value: 1 assigned; 0 unassigned
         :return: None
         """
-        self.solver.add(self.a[comp_id * self.nrVM + vm_id] == value)
+        pi = Bool("p%i" % len(self.p_constraints))
+        self.p_constraints.append(pi)
+        self.solver.assert_and_track(self.a[comp_id * self.nrVM + vm_id] == value, pi)
 
     def RestrictionLoad(self, vm_id, additional_constraints=[]):
         """
@@ -128,15 +145,20 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         :return:
         """
         if len(additional_constraints) == 0:
-            self.solver.add(
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 sum([self.a[i + vm_id] for i in range(0, len(self.a), self.nrVM)])
                 >= sum(
                     [self.a[i + vm_id + 1] for i in range(0, len(self.a), self.nrVM)]
-                )
+                ),
+                pi
             )
         else:
             if len(additional_constraints) == 1:
-                self.solver.add(
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
                     Implies(
                         additional_constraints[0],
                         sum(
@@ -151,10 +173,13 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                                 for i in range(0, len(self.a), self.nrVM)
                             ]
                         ),
-                    )
+                    ),
+                    pi
                 )
             else:
-                self.solver.add(
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
                     Implies(
                         And(additional_constraints),
                         sum(
@@ -169,7 +194,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                                 for i in range(0, len(self.a), self.nrVM)
                             ]
                         ),
-                    )
+                    ),
+                    pi
                 )
 
         return sum(
@@ -192,16 +218,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
             for conflictCompId in conflictCompsIdList:
                 # self.problem.logger.debug("...{} <= 1".format([self.a[alphaCompId * self.nrVM + j], self.a[conflictCompId * self.nrVM + j]]))
                 if self.solverTypeOptimize:
-                    self.solver.add(
-                        sum(
-                            [
-                                self.a[alphaCompId * self.nrVM + j],
-                                self.a[conflictCompId * self.nrVM + j],
-                            ]
-                        )
-                        <= 1
-                    )
-                else:
+                    pi = Bool("p%i" % len(self.p_constraints))
+                    self.p_constraints.append(pi)
                     self.solver.assert_and_track(
                         sum(
                             [
@@ -210,7 +228,20 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                             ]
                         )
                         <= 1,
-                        "LabelConflict: " + str(self.labelIdx_conflict),
+                        pi
+                    )
+                else:
+                    pi = Bool("LabelConflict: " + str(self.labelIdx_conflict))
+                    self.p_constraints.append(pi)
+                    self.solver.assert_and_track(
+                        sum(
+                            [
+                                self.a[alphaCompId * self.nrVM + j],
+                                self.a[conflictCompId * self.nrVM + j],
+                            ]
+                        )
+                        <= 1,
+                        pi,
                     )
                     self.labelIdx_conflict += 1
 
@@ -223,15 +254,20 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         """
         for j in range(self.nrVM):
             if self.solverTypeOptimize:
-                self.solver.add(
-                    self.a[alphaCompId * self.nrVM + j]
-                    == self.a[betaCompId * self.nrVM + j]
-                )
-            else:
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
                 self.solver.assert_and_track(
                     self.a[alphaCompId * self.nrVM + j]
                     == self.a[betaCompId * self.nrVM + j],
-                    "LabelOneToOne" + str(self.labelIdx),
+                    pi
+                )
+            else:
+                pi = Bool("LabelOneToOne" + str(self.labelIdx))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
+                    self.a[alphaCompId * self.nrVM + j]
+                    == self.a[betaCompId * self.nrVM + j],
+                    pi,
                 )
                 self.labelIdx_oneToOne += 1
 
@@ -248,53 +284,68 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         """
         if relation == "<=":
             if self.solverTypeOptimize:
-                self.solver.add(
-                    sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
-                    <= sum(
-                        [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
-                    )
-                )
-            else:
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
                 self.solver.assert_and_track(
                     sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
                     <= sum(
                         [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
                     ),
-                    "LabelManyToMany1: " + str(self.labelIdx),
+                    pi
+                )
+            else:
+                pi = Bool("LabelManyToMany1: " + str(self.labelIdx))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
+                    sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
+                    <= sum(
+                        [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
+                    ),
+                    pi,
                 )
                 self.labelIdx += 1
         elif relation == ">=":
             if self.solverTypeOptimize:
-                self.solver.add(
-                    sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
-                    >= sum(
-                        [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
-                    )
-                )
-            else:
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
                 self.solver.assert_and_track(
                     sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
                     >= sum(
                         [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
                     ),
-                    "LabelManyToMany2: " + str(self.labelIdx),
+                    pi
+                )
+            else:
+                pi = Bool("LabelManyToMany2: " + str(self.labelIdx))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
+                    sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
+                    >= sum(
+                        [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
+                    ),
+                    pi,
                 )
                 self.labelIdx += 1
         elif relation == "=":
             if self.solverTypeOptimize:
-                self.solver.add(
-                    sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
-                    == sum(
-                        [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
-                    )
-                )
-            else:
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
                 self.solver.assert_and_track(
                     sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
                     == sum(
                         [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
                     ),
-                    "LabelManyToMany3: " + str(self.labelIdx),
+                    pi
+                )
+            else:
+                pi = Bool("LabelManyToMany3: " + str(self.labelIdx))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
+                    sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
+                    == sum(
+                        [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
+                    ),
+                    pi,
                 )
                 self.labelIdx += 1
 
@@ -307,36 +358,46 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         :return: None
         """
         if self.solverTypeOptimize:
-            self.solver.add(
-                noInstances
-                * sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
-                - sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
-                > 0
-            )
-        else:
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
             self.solver.assert_and_track(
                 noInstances
                 * sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
                 - sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
                 > 0,
-                "LabelOneToMany: " + str(self.labelIdx),
+                pi
+            )
+        else:
+            pi = Bool("LabelOneToMany: " + str(self.labelIdx))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
+                noInstances
+                * sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
+                - sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
+                > 0,
+                pi,
             )
             self.labelIdx += 1
 
         if self.solverTypeOptimize:
-            self.solver.add(
-                noInstances
-                * sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
-                - sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
-                <= noInstances
-            )
-        else:
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
             self.solver.assert_and_track(
                 noInstances
                 * sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
                 - sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
                 <= noInstances,
-                "LabelOneToMany: " + str(self.labelIdx),
+                pi
+            )
+        else:
+            pi = Bool("LabelOneToMany: " + str(self.labelIdx))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
+                noInstances
+                * sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
+                - sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
+                <= noInstances,
+                pi,
             )
             self.labelIdx += 1
 
@@ -360,18 +421,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
 
         if operator == "<=":
             if self.solverTypeOptimize:
-                self.solver.add(
-                    sum(
-                        [
-                            self.a[compId * self.nrVM + j]
-                            for compId in compsIdList
-                            for j in range(self.nrVM)
-                        ]
-                    )
-                    <= bound
-                )
-            else:
-                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) <= bound
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
                 self.solver.assert_and_track(
                     sum(
                         [
@@ -381,12 +432,13 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                         ]
                     )
                     <= bound,
-                    "LabelUpperLowerEqualBound" + str(self.labelIdx),
+                    pi
                 )
-                self.labelIdx += 1
-        elif operator == ">=":
-            if self.solverTypeOptimize:
-                self.solver.add(
+            else:
+                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) <= bound
+                pi = Bool("LabelUpperLowerEqualBound" + str(self.labelIdx))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
                     sum(
                         [
                             self.a[compId * self.nrVM + j]
@@ -394,10 +446,14 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                             for j in range(self.nrVM)
                         ]
                     )
-                    >= bound
+                    <= bound,
+                    pi,
                 )
-            else:
-                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) >= bound
+                self.labelIdx += 1
+        elif operator == ">=":
+            if self.solverTypeOptimize:
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
                 self.solver.assert_and_track(
                     sum(
                         [
@@ -407,12 +463,13 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                         ]
                     )
                     >= bound,
-                    "LabelUpperLowerEqualBound" + str(self.labelIdx),
+                    pi
                 )
-                self.labelIdx += 1
-        elif operator == "=":
-            if self.solverTypeOptimize:
-                self.solver.add(
+            else:
+                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) >= bound
+                pi = Bool("LabelUpperLowerEqualBound" + str(self.labelIdx))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
                     sum(
                         [
                             self.a[compId * self.nrVM + j]
@@ -420,11 +477,14 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                             for j in range(self.nrVM)
                         ]
                     )
-                    == bound
+                    >= bound,
+                    pi,
                 )
-            else:
-                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) == bound
-
+                self.labelIdx += 1
+        elif operator == "=":
+            if self.solverTypeOptimize:
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
                 self.solver.assert_and_track(
                     sum(
                         [
@@ -434,7 +494,22 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                         ]
                     )
                     == bound,
-                    "LabelUpperLowerEqualBound" + str(self.labelIdx),
+                    pi
+                )
+            else:
+                # self.__constMap[str("LabelUpperLowerEqualBound" + str(self.labelIdx))] = sum([self.a[compId * self.nrVM + j] for compId in compsIdList for j in range(self.nrVM)]) == bound
+                pi = Bool("LabelUpperLowerEqualBound" + str(self.labelIdx))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
+                    sum(
+                        [
+                            self.a[compId * self.nrVM + j]
+                            for compId in compsIdList
+                            for j in range(self.nrVM)
+                        ]
+                    )
+                    == bound,
+                    pi,
                 )
                 self.labelIdx += 1
         else:
@@ -451,17 +526,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         for i in range(len(compsIdList)):
             compsIdList[i] -= 1
         if self.solverTypeOptimize:
-            self.solver.add(
-                sum(
-                    [
-                        self.a[compId * self.nrVM + j]
-                        for compId in compsIdList
-                        for j in range(self.nrVM)
-                    ]
-                )
-                >= lowerBound
-            )
-        else:
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
             self.solver.assert_and_track(
                 sum(
                     [
@@ -471,11 +537,12 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                     ]
                 )
                 >= lowerBound,
-                "LabelRangeBound: " + str(self.labelIdx),
+                pi
             )
-            self.labelIdx += 1
-        if self.solverTypeOptimize:
-            self.solver.add(
+        else:
+            pi = Bool("LabelRangeBound: " + str(self.labelIdx))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 sum(
                     [
                         self.a[compId * self.nrVM + j]
@@ -483,9 +550,13 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                         for j in range(self.nrVM)
                     ]
                 )
-                <= upperBound
+                >= lowerBound,
+                pi,
             )
-        else:
+            self.labelIdx += 1
+        if self.solverTypeOptimize:
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
             self.solver.assert_and_track(
                 sum(
                     [
@@ -495,7 +566,21 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                     ]
                 )
                 <= upperBound,
-                "LabelRangeBound: " + str(self.labelIdx),
+                pi
+            )
+        else:
+            pi = Bool("LabelRangeBound: " + str(self.labelIdx))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
+                sum(
+                    [
+                        self.a[compId * self.nrVM + j]
+                        for compId in compsIdList
+                        for j in range(self.nrVM)
+                    ]
+                )
+                <= upperBound,
+                pi,
             )
             self.labelIdx += 1
 
@@ -509,31 +594,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         """
         for j in range(self.nrVM):
             if self.solverTypeOptimize:
-                self.solver.add(
-                    (
-                        sum(
-                            [self.a[alphaCompId * self.nrVM + j]]
-                            + [
-                                self.a[_compId * self.nrVM + j]
-                                for _compId in notInConflictCompsIdList
-                            ]
-                        )
-                    )
-                    == (
-                        If(
-                            sum(
-                                [
-                                    self.a[i + j]
-                                    for i in range(0, len(self.a), self.nrVM)
-                                ]
-                            )
-                            >= 1,
-                            1,
-                            0,
-                        )
-                    )
-                )
-            else:
+                pi = Bool("p%i" % len(self.p_constraints))
+                self.p_constraints.append(pi)
                 self.solver.assert_and_track(
                     (
                         sum(
@@ -557,7 +619,35 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                             0,
                         )
                     ),
-                    "LabelFullDeployment: " + str(self.labelIdx),
+                    pi
+                )
+            else:
+                pi = Bool("LabelFullDeployment: " + str(self.labelIdx))
+                self.p_constraints.append(pi)
+                self.solver.assert_and_track(
+                    (
+                        sum(
+                            [self.a[alphaCompId * self.nrVM + j]]
+                            + [
+                                self.a[_compId * self.nrVM + j]
+                                for _compId in notInConflictCompsIdList
+                            ]
+                        )
+                    )
+                    == (
+                        If(
+                            sum(
+                                [
+                                    self.a[i + j]
+                                    for i in range(0, len(self.a), self.nrVM)
+                                ]
+                            )
+                            >= 1,
+                            1,
+                            0,
+                        )
+                    ),
+                    pi,
                 )
                 self.labelIdx += 1
 
@@ -576,7 +666,9 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         #                          "betaCompIdInstances={}".format(alphaCompId, betaCompId, alphaCompIdInstances, betaCompIdInstances))
 
         if self.solverTypeOptimize:
-            self.solver.add(
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 Or(
                     sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
                     == 0,
@@ -588,7 +680,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                     * sum(
                         [self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]
                     ),
-                )
+                ),
+                pi
             )
         else:
             self.__constMap[
@@ -601,6 +694,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
             ) <= betaCompIdInstances * sum(
                 [If(self.a[betaCompId * self.nrVM + j], 1, 0) for j in range(self.nrVM)]
             )
+            pi = Bool("LabelRequireProvide: " + str(self.labelIdx))
+            self.p_constraints.append(pi)
             self.solver.assert_and_track(
                 alphaCompIdInstances
                 * sum(
@@ -616,7 +711,7 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                         for j in range(self.nrVM)
                     ]
                 ),
-                "LabelRequireProvide: " + str(self.labelIdx),
+                pi,
             )
             self.labelIdx += 1
 
@@ -633,34 +728,43 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
             )
         )
         if self.solverTypeOptimize:
-            self.solver.add(
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 Or(
                     sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
                     == 0,
                     sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
                     >= 1,
-                )
+                ),
+                pi
             )
-
-            self.solver.add(
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 Or(
                     sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
                     == 0,
                     sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
                     >= 1,
-                )
+                ),
+                pi
             )
-
-            self.solver.add(
+            pi = Bool("p%i" % len(self.p_constraints))
+            self.p_constraints.append(pi)
+            self.solver.assert_and_track(
                 sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)])
                 + sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)])
-                >= 1
+                >= 1,
+                pi
             )
 
             # self.solver.add(
             #     Xor(sum([self.a[betaCompId * self.nrVM + j] for j in range(self.nrVM)]) == 0,
             #         sum([self.a[alphaCompId * self.nrVM + j] for j in range(self.nrVM)]) == 0, True))
         else:
+            pi = Bool("LabelAlphaOrBeta: " + str(self.labelIdx))
+            self.p_constraints.append(pi)
             self.solver.assert_and_track(
                 Or(
                     sum(
@@ -678,10 +782,11 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                     )
                     >= 1,
                 ),
-                "LabelAlphaOrBeta: " + str(self.labelIdx),
+                pi,
             )
             self.labelIdx += 1
-
+            pi = Bool("LabelAlphaOrBeta: " + str(self.labelIdx))
+            self.p_constraints.append(pi)
             self.solver.assert_and_track(
                 Or(
                     sum(
@@ -699,10 +804,11 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                     )
                     >= 1,
                 ),
-                "LabelAlphaOrBeta: " + str(self.labelIdx),
+                pi,
             )
             self.labelIdx += 1
-
+            pi = Bool("LabelAlphaOrBeta: " + str(self.labelIdx))
+            self.p_constraints.append(pi)
             self.solver.assert_and_track(
                 sum(
                     [
@@ -717,7 +823,7 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                     ]
                 )
                 >= 1,
-                "LabelAlphaOrBeta: " + str(self.labelIdx),
+                pi,
             )
             self.labelIdx += 1
 
@@ -779,7 +885,7 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
         if not self.solverTypeOptimize:
             c = self.solver.unsat_core()
             self.problem.logger.debug("unsat_constraints= {}".format(c))
-            print("unsat_constraints= {}".format(c))
+            # print("unsat_constraints= {}".format(c))
             # for cc in c:
             #     self.problem.logger.debug(
             #         "Constraint label: {} constraint description {}".format(str(cc), self.__constMap[cc]))
@@ -806,8 +912,8 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
             for k in range(self.nrVM):
                 vms_type.append(model[self.vmType[k]])
             # print(vms_type)
-        else:
-            print("UNSAT")
+        # else:
+        #     print("UNSAT")
         if self.solverTypeOptimize:
             if status == sat:
                 # print("a_mat", a_mat)
@@ -824,4 +930,7 @@ class Z3_Solver_Int_Parent(ManuverSolver):  # ManeuverProblem):
                 # unsat
                 return -1, None, None, None, None
         else:
-            return None, None, stoptime - startime
+            if self.smt2lib is not None:
+                with open(self.smt2lib, "a+") as fo:
+                    fo.write(f"\n UNSAT: {c}")
+            return c, None, stoptime - startime
