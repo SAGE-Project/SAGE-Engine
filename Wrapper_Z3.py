@@ -2,19 +2,27 @@ import json
 from Solvers.Core.ProblemDefinition import ManeuverProblem
 from src.init import log
 import src.smt
+import numpy as np
+import uuid
 
 
 def add_pred_soft_constraints(solver, prediction):
     # prediction is a matrix of size (nr components) * (nr vms * nr offers)
+    constraints = []
     for comp_idx in range(solver.nrComp):
         pred_comp = prediction[comp_idx]
+        matrix = np.reshape(pred_comp, (solver.nrOffers, solver.nrVM))
         for vm_idx in range(solver.nrVM):
-            pred_comp_vm = pred_comp[vm_idx * solver.nrOffers:(vm_idx + 1) * solver.nrOffers]
+            pred_comp_vm = matrix[:, vm_idx]
             placements = [i for i, x in enumerate(pred_comp_vm) if x == 1]
             if len(placements) != 0:
-                solver.solver.add_soft(solver.a[comp_idx * solver.nrVM + comp_idx] == 1)
+                constraints.append(solver.a[comp_idx * solver.nrVM + vm_idx] == 1)
+            else:
+                constraints.append(solver.a[comp_idx * solver.nrVM + vm_idx] == 0)
             for placement in placements:
-                solver.solver.add_soft(solver.vmType[vm_idx] == placement)
+                constraints.append(solver.vmType[vm_idx] == placement + 1)
+    constraints = list(set(constraints))
+    solver.solver.add_soft(constraints)
 
 
 def add_pred_soft_constraints_sim(solver, prediction):
@@ -36,7 +44,8 @@ class Wrapper_Z3:
             offers_json,
             prediction=None,
             prediction_sim=None,
-            inst=0
+            inst=0,
+            out=True
     ):
         SMTsolver = src.smt.getSolver(self.solver_id)
         availableConfigurations = []
@@ -54,7 +63,11 @@ class Wrapper_Z3:
         problem.readConfigurationJSON(
             application_model_json, availableConfigurations, inst
         )
-        SMTsolver.init_problem(problem, "optimize", sb_option=self.symmetry_breaker)
+        if out:
+            SMTsolver.init_problem(problem, "optimize", sb_option=self.symmetry_breaker,
+                               smt2lib="output/" + application_model_json["application"] + "_" + str(uuid.uuid4()))
+        else:
+            SMTsolver.init_problem(problem, "optimize", sb_option=self.symmetry_breaker)
         if prediction is not None:
             add_pred_soft_constraints(SMTsolver, prediction)
         elif prediction_sim is not None:

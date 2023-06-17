@@ -31,7 +31,7 @@ def without_keys(d, keys):
     return {k: v for k, v in d.items() if k not in keys}
 
 
-def get_node_features(component, restrictions, max_cpu, max_mem, max_storage):
+def get_node_features(component, restrictions, max_cpu, max_mem, max_storage, id):
     # normalize values
     cpu = component["Compute"]["CPU"] / max_cpu
     memory = component["Compute"]["Memory"] / max_mem
@@ -52,13 +52,13 @@ def get_node_features(component, restrictions, max_cpu, max_mem, max_storage):
         if res["type"] == "EqualBound" and len(res["compsIdList"]) == 1 and node_id in res["compsIdList"]:
             eq_b = 1
 
-    return [cpu, memory, storage, full_deploy, upper_b, lower_b, eq_b]
+    return [id/4, cpu, memory, storage, full_deploy, upper_b, lower_b, eq_b]
 
 
 def get_component_nodes(json_data, restrictions, max_cpu, max_mem, max_storage):
     component_nodes = []
-    for component in json_data['components']:
-        features = get_node_features(component, restrictions, max_cpu, max_mem, max_storage)
+    for id,component in enumerate(json_data['components']):
+        features = get_node_features(component, restrictions, max_cpu, max_mem, max_storage,id)
         component_node = Node(component['id'], features, "component")
         component_nodes.append(component_node)
     return component_nodes
@@ -240,7 +240,7 @@ if __name__ == '__main__':
     validation = arr[size1:size1 + size2].tolist()
     test = arr[size1 + size2:].tolist()
 
-    model = Model(7, 10, 5, ['conflict', 'linked', 'unlinked'])
+    model = Model(8, 10, 5, ['conflict', 'linked', 'unlinked'])
     model = model.to('cuda')
     opt = torch.optim.Adam(model.parameters())
     loss_list = []

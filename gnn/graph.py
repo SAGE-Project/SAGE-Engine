@@ -96,7 +96,7 @@ class Graph:
             for vm_idx, vm_linked in enumerate(comp_links):
                 node1 = next((x for x in component_nodes if x.id == comp_idx + 1))
                 type_vm = output['types_of_VMs'][vm_idx] - 1
-                vm_type_idx = surrogate_result * type_vm + type_indexes[type_vm]
+                vm_type_idx = surrogate_result * type_vm + vm_idx
                 type_indexes[type_vm] = type_indexes[type_vm] + 1
                 if vm_linked:
                     node2 = next((x for x in vm_nodes if x.id == self.vm_index_start + vm_type_idx))

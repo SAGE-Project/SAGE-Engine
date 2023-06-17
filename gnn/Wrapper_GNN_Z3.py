@@ -11,12 +11,13 @@ class Wrapper_GNN_Z3:
         z3_solver = Wrapper_Z3(symmetry_breaker=self.symmetry_breaker)
         if mode == "gnn":
             prediction = self.gnn_predictor.solve(application_model_json, offers_json)
-            solution = z3_solver.solve(application_model_json, offers_json, prediction=prediction)
+            solution = z3_solver.solve(application_model_json, offers_json, prediction=prediction, out=True)
         elif mode == "sim":
-            sim_perfect_prediction = z3_solver.solve(application_model_json, offers_json)
-            solution = z3_solver.solve(application_model_json, offers_json, prediction_sim=sim_perfect_prediction)
+            sim_perfect_prediction = z3_solver.solve(application_model_json, offers_json, out=False)
+            solution = z3_solver.solve(application_model_json, offers_json, prediction_sim=sim_perfect_prediction,
+                                       out=False)
         else:
-            solution = z3_solver.solve(application_model_json, offers_json)
+            solution = z3_solver.solve(application_model_json, offers_json, out=False)
         print(solution["output"]["time (secs)"])
         print(solution["output"]["min_price"])
 
